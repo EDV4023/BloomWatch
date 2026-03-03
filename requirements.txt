@@ -1,0 +1,7 @@
+geocoder
+geopy
+google-genai
+numpy
+opencv-python-headless
+streamlit
+firebase-admin
