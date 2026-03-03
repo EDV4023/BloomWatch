@@ -21,6 +21,6 @@ leaderboard = l[0:11]
 # Write as many people on leaderboard as possible
 try:
     for i in range(1,11):
-        st.write(f"{i}. {l[i-1][0]}") 
+        st.write(f"{i}. {l[i-1][0]} - {l[i-1][1]}") 
 except:
     st.write()

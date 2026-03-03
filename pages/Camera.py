@@ -184,8 +184,8 @@ def identify(img):
     })
 st.title(":green[Wildlife] Scan")
 
-# img = st.camera_input("Take an image of wildlife in you backyard")  # # Use when deployed
-img = st.file_uploader("Test Image")
+img = st.camera_input("Take an image of wildlife in you backyard")  # # Use when deployed
+# img = st.file_uploader("Test Image")
 
 if img:
     st.image(img)
