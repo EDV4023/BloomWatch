@@ -15,7 +15,7 @@ for i in ref:
 def s(tup):
     return tup[1] 
 
-l.sort(key = s) 
+l.sort(key = s, reverse = True) 
 leaderboard = l[0:11]
 
 # Write as many people on leaderboard as possible

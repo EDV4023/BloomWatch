@@ -1,7 +1,8 @@
 [theme]
-primaryColor="#c0dac0"
-backgroundColor="#d8e6d9"
-secondaryBackgroundColor="#f8cfa2"
-textColor="#719178"
+base="light"
+primaryColor="slateBlue"
+backgroundColor="mintCream"
+secondaryBackgroundColor="darkSeaGreen"
+baseRadius="full"
 font = "Stardos Stencil:https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@400;700&display=swap, sans-serif"
 baseFontSize = 18
