@@ -17,4 +17,7 @@ st.title(f"**{st.query_params.species}**")
 
 image = soup.find("img", attrs = {"class" : "YQ4gaf"})
 
-st.image(image["src"])
+st.write(url)
+
+if image:
+    st.image(image["src"])
