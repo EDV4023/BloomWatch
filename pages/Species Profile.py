@@ -17,9 +17,6 @@ soup = BeautifulSoup(response.text, 'html.parser')
 st.title(f"**{st.query_params.species}**")
 
 image = soup.find("img", attrs = {"class" : "YQ4gaf"})
-
-st.page_link(page = url, label = "Image Search")
-st.write(image)
-
+st.code(response.text[:2000])
 if image:
     st.image(image["src"])
