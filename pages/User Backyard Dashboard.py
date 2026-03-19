@@ -116,7 +116,7 @@ if combined_species_list:
         with species_info:
             st.write(f"{entry[0]}: {entry[1]}")
         with species_profile:
-            st.page_link(page = r"pages/Species Profile", label = "Species Profile")
+            st.page_link(page = r"pages/Species Profile.py", label = "Species Profile")
 
     species_count = {}
     for entry in combined_species_list:
