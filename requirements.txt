@@ -5,3 +5,5 @@ numpy
 opencv-python-headless
 streamlit
 firebase-admin
+requests
+beautifulsoup4

@@ -35,7 +35,7 @@ for p in plants:
 animals = clean_list(user_data["animals"])
 new_animals = []
 for a in animals:
-    new_animals.append((a,":blue:[Animal]"))
+    new_animals.append((a,":blue[Animal]"))
 
 flowers = clean_list(user_data["flowers"])
 new_flowers = []
