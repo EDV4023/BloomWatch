@@ -79,8 +79,8 @@ Task: Regional Ecological Identification
 Location: {city}, {state}, USA
 
 Instructions:
-1. Identify the species in the image (Scientific and Common name).
-2. Determine if the species is indigenous to the specific ecosystem of {state}. 
+1. Identify the species in the image (Common name).
+2. Determine if the species is indigenous to the specific ecosystem of {city}, {state}. 
    - If it was introduced from another continent or region and disrupts the local environment (e.g., Chinese Tallow, Emerald Ash Borer, Kudzu), it MUST be classified as "Non-Native" with a score of -1.
 3. Apply the following hierarchy for the score:
    - Non-native/Invasive = -1

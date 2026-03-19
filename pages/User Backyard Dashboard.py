@@ -35,7 +35,7 @@ for p in plants:
 animals = clean_list(user_data["animals"])
 new_animals = []
 for a in animals:
-    new_animals.append((a,"blue:[Animal]"))
+    new_animals.append((a,":blue:[Animal]"))
 
 flowers = clean_list(user_data["flowers"])
 new_flowers = []
@@ -116,7 +116,7 @@ if combined_species_list:
         with species_info:
             st.write(f"{entry[0]}: {entry[1]}")
         with species_profile:
-            st.page_link(page = r"pages/Species Profile.py", label = "Species Profile")
+            st.page_link(page = r"pages/Species Profile.py", label = "Species Profile", query_params = {"species" : entry[0]})
 
     species_count = {}
     for entry in combined_species_list:
