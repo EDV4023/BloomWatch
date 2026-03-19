@@ -35,12 +35,12 @@ for p in plants:
 animals = clean_list(user_data["animals"])
 new_animals = []
 for a in animals:
-    new_animals.append((a,":gray[Animal]"))
+    new_animals.append((a,"blue:[Animal]"))
 
 flowers = clean_list(user_data["flowers"])
 new_flowers = []
 for f in flowers:
-    new_flowers.append((f,":blue[Flowering Plant]"))
+    new_flowers.append((f,":violet[Flowering Plant]"))
 
 pollinators = clean_list(user_data["pollinators"])
 new_pollinators = []
@@ -112,7 +112,11 @@ st.divider()
 if combined_species_list:
     st.subheader("Sightings History")
     for entry in combined_species_list:
-        st.write(f"{entry[0]}: {entry[1]}")
+        species_info, species_profile = st.columns(2)
+        with species_info:
+            st.write(f"{entry[0]}: {entry[1]}")
+        with species_profile:
+            st.page_link(page = r"pages/Species Profile", label = "Species Profile")
 
     species_count = {}
     for entry in combined_species_list:
@@ -157,7 +161,7 @@ try:
     response = client.models.generate_content(
     model="gemini-2.0-flash",
     contents = f"Reccomend more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly. Current user's backyard {combined_species_list}. Only list out specific species with their common name in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - Add SPECIES_NAME \n - Add SPECIES_NAME \n - Add SPECIES_NAME")
-    st.write("**Possible New Additions to Consider:**")
+    st.write("**Possible New Additions to Look Out for:**")
     st.write(response.text)
 except:
     st.space()
