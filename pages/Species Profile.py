@@ -18,5 +18,8 @@ st.title(f"**{st.query_params.species}**")
 
 image = soup.find("img", attrs = {"class" : "YQ4gaf"})
 
+st.page_link(page = url, label = "Image Search")
+st.write(image)
+
 if image:
     st.image(image["src"])
