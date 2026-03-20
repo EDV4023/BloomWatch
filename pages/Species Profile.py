@@ -19,7 +19,7 @@ for list_item in list_tags:
     if "placeholder" not in list_item.text:
         result_tag = list_item
 
-soup = BeautifulSoup(result_tag.text, "html.parser")
+soup = BeautifulSoup(result_tag, "html.parser")
 title = soup.find("a").get("title")
 
 url = fr"https://en.wikipedia.org/api/rest_v1/page/summary/{title.replace(" ", "_")}"
