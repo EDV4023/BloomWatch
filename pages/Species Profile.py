@@ -24,6 +24,7 @@ for list_item in list_tags:
 title = result_tag.find("a").get("title")
 
 url = fr"https://en.wikipedia.org/api/rest_v1/page/summary/{title.replace(" ", "_")}"
+st.write(url)
 response = requests.get(url, headers = headers).json()
 
 
