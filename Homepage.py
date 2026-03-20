@@ -35,8 +35,6 @@ with st.form("Login"):
     login = st.form_submit_button("Log In")
     if login and (username in users_dict.keys()) and (len(username) >= 6) and (len(password) >= 6):
         if (users_dict[username]['password'] == password):
-            st.success("Succesfully logged in")
-
             # Initialize user data in session state:
             st.session_state['loggedin'] = True
             st.session_state.username = username
@@ -49,13 +47,12 @@ with st.form("Login"):
             st.session_state.non_native = list(users_dict[username]["non_native"])
             st.session_state.history = []
 
+            st.switch_page(r"pages/Camera.py")
+
 
 
             
 st.page_link(page = r"pages/Sign Up.py", label = "Sign Up")
-if "loggedin" in st.session_state:
-    if st.session_state.loggedin:
-        st.page_link(page = r"pages/Camera.py", label = "Next")
 
 # Testing firebase database
 # db.reference("users").set({})

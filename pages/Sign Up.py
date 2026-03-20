@@ -1,6 +1,7 @@
 from firebase_admin import db, credentials
 import streamlit as st
 import firebase_admin
+import time
 
 # Initialize Firebase
 @st.cache_resource
@@ -27,9 +28,10 @@ with st.form("Signup"):
         if (len(username) >= 6) and (len(password) >= 6):
             if (users_dict == None or (username not in users_dict.keys())):
                 st.success("Congratulations on making your new account!")
+                st.balloons()
                 new_user_ref = db.reference(f'users/{username}')
                 new_user_ref.set({'password': password, 'points': 0, 'plants': ["PLACEHOLDER"], "animals" : ["PLACEHOLDER"], "flowers" : ["PLACEHOLDER"], "pollinators" : ["PLACEHOLDER"], "non_native":["PLACEHOLDER"]})
-                st.page_link(page = r"Homepage.py", label = "Login")
+                st.switch_page(r"Homepage.py")
             else:
                 st.error("**Username not availabe**")
         elif signup:
