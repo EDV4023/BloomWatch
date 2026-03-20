@@ -12,14 +12,14 @@ headers={"User-Agent": "BloomWatch/1.0"}
 
 search_url = f"https://en.wikipedia.org/w/index.php?search={st.query_params.species}&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1"
 search_response = requests.get(search_url, headers = headers)
-soup = BeautifulSoup(search_response, "html.parser")
+soup = BeautifulSoup(search_response.text, "html.parser")
 
 list_tags = soup.find_all("li", attrs = {"class":"mw-search-result mw-search-result-ns-0"})
 for list_item in list_tags:
     if "placeholder" not in list_item.text:
         result_tag = list_item
 
-soup = BeautifulSoup(result_tag, "html.parser")
+soup = BeautifulSoup(result_tag.text, "html.parser")
 title = soup.find("a").get("title")
 
 url = fr"https://en.wikipedia.org/api/rest_v1/page/summary/{title.replace(" ", "_")}"
