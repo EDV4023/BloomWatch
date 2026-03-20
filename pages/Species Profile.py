@@ -15,6 +15,7 @@ search_response = requests.get(search_url, headers = headers)
 soup = BeautifulSoup(search_response.text, "html.parser")
 
 list_tags = soup.find_all("li", attrs = {"class":"mw-search-result mw-search-result-ns-0"})
+first_result = list_tags[0]
 result_tag = None
 for list_item in list_tags:
     if "placeholder" not in str(list_item):
@@ -23,11 +24,18 @@ for list_item in list_tags:
 
 title = result_tag.find("a").get("title")
 
+first_title = first_result.find("a").get("title")
+
 url = fr"https://en.wikipedia.org/api/rest_v1/page/summary/{title.replace(" ", "_")}"
 response = requests.get(url, headers = headers).json()
-
 
 st.title(f"**{st.query_params.species}**")
 
 if "thumbnail" in response:
     st.image(response["thumbnail"]["source"])
+
+url = fr"https://en.wikipedia.org/api/rest_v1/page/summary/{first_title.replace(" ", "_")}"
+response = requests.get(url, headers = headers).json()
+
+if "extract" in response:
+    st.write(response["extract"])
