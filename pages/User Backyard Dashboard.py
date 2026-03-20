@@ -104,7 +104,7 @@ if city and state:
     st.subheader(f"Location: {city}, {state}")
 
 #Display total points
-st.metric(label="Total Points", value=st.session_state.points)
+st.metric(label="Total Points", value=user_data["points"])
 
 st.divider()
 
@@ -116,7 +116,7 @@ if combined_species_list:
         with species_info:
             st.write(f"{entry[0]}: {entry[1]}")
         with species_profile:
-            st.page_link(page = r"pages/Species Profile.py", label = "Species Profile", query_params = {"species" : entry[0]})
+            st.page_link(page = r"pages/Species Profile.py", label = "Species Profile", query_params = {"species" : entry[0], "type" : entry[1].split("[")[:-1]})
 
     species_count = {}
     for entry in combined_species_list:
