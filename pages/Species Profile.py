@@ -36,11 +36,8 @@ color_map = {
     "Non-Native/Invasive Species": "red"
 }
 
-col1, col2 = st.columns(2)
-with col1:
-    st.title(f"**{st.query_params.species}**")
-with col2:
-    st.badge(label = st.query_params.type, color = color_map[st.query_params.type])
+st.title(f"**{st.query_params.species}**")
+st.badge(label = st.query_params.type, color = color_map[st.query_params.type])
 
 if "thumbnail" in response:
     st.image(response["thumbnail"]["source"])
