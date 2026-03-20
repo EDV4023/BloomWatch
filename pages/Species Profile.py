@@ -17,14 +17,13 @@ soup = BeautifulSoup(search_response.text, "html.parser")
 list_tags = soup.find_all("li", attrs = {"class":"mw-search-result mw-search-result-ns-0"})
 result_tag = None
 for list_item in list_tags:
-    if "placeholder" not in list_item.text:
+    if "placeholder" not in str(list_item):
         result_tag = list_item
         break
 
 title = result_tag.find("a").get("title")
 
 url = fr"https://en.wikipedia.org/api/rest_v1/page/summary/{title.replace(" ", "_")}"
-st.write(url)
 response = requests.get(url, headers = headers).json()
 
 
