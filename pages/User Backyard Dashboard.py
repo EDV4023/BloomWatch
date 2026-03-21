@@ -174,7 +174,7 @@ try:
     for i in response.text.split("\n"):
         species = i.split("||")[0]
         species_type = i.split("||")[1]
-
+        st.write(response.text)
         recc_info, recc_profile = st.columns(2)
         with recc_info:
             st.write(f"{species}: :{color_map[species_type]}-badge{species_type}")
