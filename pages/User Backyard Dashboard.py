@@ -56,41 +56,41 @@ total_points = user_data["points"]
 
 combined_species_list = new_plants + new_animals + new_flowers + new_pollinators + new_nn
 
-# Tested: Working
-def get_latlng() -> tuple[float, float]:
-    g = geocoder.ip("me") # Get user's current IP: Need to ask user for permission to access location data
+# # Tested: Working
+# def get_latlng() -> tuple[float, float]:
+#     g = geocoder.ip("me") # Get user's current IP: Need to ask user for permission to access location data
 
-    # If latitude and longitude attribute exsits then extract location data
-    if g.latlng:
-        lat, long = g.latlng
-        return lat, long
+#     # If latitude and longitude attribute exsits then extract location data
+#     if g.latlng:
+#         lat, long = g.latlng
+#         return lat, long
+#     else:
+#         return None
+
+# # Tested: Working
+# def convert_latlng_to_city(lat: float, long: float) -> str | None:
+#     geolocator = Nominatim(user_agent = "backyard_environmental_diversity_checker | edanvaiz@gmail.com")
+
+#     try:
+#         location = geolocator.reverse(f"{lat},{long}")
+
+#         # Obtain postal code/zip code
+#         if location and "address" in location.raw:
+#             address = location.raw["address"]
+#             return address["town"], address["state"]
+#         return None
+#     except (GeocoderTimedOut, GeocoderServiceError):
+#         return None
+
+# Tested: Working
+def user_location() -> tuple[str, str] | None:
+    users_ref = db.reference(f"users/{st.session_state.username}")
+    users_dict = users_ref.get()
+    if users_dict:
+        return users_dict["city"], users_dict["state"]
     else:
         return None
-
-# Tested: Working
-def convert_latlng_to_city(lat: float, long: float) -> str | None:
-    geolocator = Nominatim(user_agent = "backyard_environmental_diversity_checker | edanvaiz@gmail.com")
-
-    try:
-        location = geolocator.reverse(f"{lat},{long}")
-
-        # Obtain postal code/zip code
-        if location and "address" in location.raw:
-            address = location.raw["address"]
-            return address["town"], address["state"]
-        return None
-    except (GeocoderTimedOut, GeocoderServiceError):
-        return None
-
-# Tested: Working
-def user_location() -> str | None:
-    lat, long = get_latlng()
-    city,state = convert_latlng_to_city(lat, long)
-    if city and state:
-        return city,state
-    else:
-        return None
-
+    
 
 if "history" not in st.session_state:
     st.session_state.history = []

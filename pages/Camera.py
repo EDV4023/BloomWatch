@@ -8,6 +8,7 @@ import cv2
 import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, db
+import requests
 
 client = genai.Client(api_key = st.secrets.API_KEY)
 
@@ -25,40 +26,42 @@ def resize(image):
         image = cv2.resize(image, (int(scale*width),int(scale*height)))
     return image    
 
-# Tested: Working
-def get_latlng() -> tuple[float, float]:
-    g = geocoder.ip("me") # Get user's current IP: Need to ask user for permission to access location data
+# # Tested: Working
+# def get_latlng() -> tuple[float, float]:
+#     g = geocoder.ip("me") # Get user's current IP: Need to ask user for permission to access location data
 
-    # If latitude and longitude attribute exsits then extract location data
-    if g.latlng:
-        lat, long = g.latlng
-        return lat, long
+#     # If latitude and longitude attribute exsits then extract location data
+#     if g.latlng:
+#         lat, long = g.latlng
+#         return lat, long
+#     else:
+#         return None
+
+# # Tested: Working
+# def convert_latlng_to_city(lat: float, long: float) -> tuple[str, str] | None:
+#     geolocator = Nominatim(user_agent = "backyard_environmental_diversity_checker | edanvaiz@gmail.com")
+
+#     try:
+#         location = geolocator.reverse(f"{lat},{long}")
+
+#         # Obtain postal code/zip code
+#         if location and "address" in location.raw:
+#             address = location.raw["address"]
+#             return address["town"], address["state"]
+#         return None
+#     except (GeocoderTimedOut, GeocoderServiceError):
+#         return None
+
+# Tested: Working
+def user_location() -> tuple[str, str] | None:
+    users_ref = db.reference(f"users/{st.session_state.username}")
+    users_dict = users_ref.get()
+    if users_dict:
+        return users_dict["city"], users_dict["state"]
     else:
         return None
-
-# Tested: Working
-def convert_latlng_to_city(lat: float, long: float) -> tuple[str, str] | None:
-    geolocator = Nominatim(user_agent = "backyard_environmental_diversity_checker | edanvaiz@gmail.com")
-
-    try:
-        location = geolocator.reverse(f"{lat},{long}")
-
-        # Obtain postal code/zip code
-        if location and "address" in location.raw:
-            address = location.raw["address"]
-            return address["town"], address["state"]
-        return None
-    except (GeocoderTimedOut, GeocoderServiceError):
-        return None
-
-# Tested: Working
-def user_location() -> str | None:
-    lat, long = get_latlng()
-    city = convert_latlng_to_city(lat, long)
-    if city:
-        return city
-    else:
-        return None
+    
+    
 
 # Recognized image to be plant, animal, or neither and assigns points (10 for pollinators, 5 for flowers, 3 for animals, 1 for plants, and 0 if netiher)
 # Tested: Working

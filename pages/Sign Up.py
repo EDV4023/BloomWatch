@@ -1,7 +1,7 @@
 from firebase_admin import db, credentials
 import streamlit as st
 import firebase_admin
-import time
+import requests
 
 # Initialize Firebase
 @st.cache_resource
@@ -18,6 +18,15 @@ st.session_state.init_run = False
 users_ref = db.reference('users')
 users_dict = users_ref.get()
 
+# Tested: Working
+def user_location() -> tuple[str, str] | None:
+    url = "https://ipapi.co/json/"
+    response = requests.get(url, headers = {"User-Agent": "BloomWatch/1.0"}).json()
+    if response:
+        return response["city"], response["region"]
+    else:
+        return None
+
 #Sign-up Form
 with st.form("Signup"):
     st.header('Sign Up')
@@ -28,9 +37,10 @@ with st.form("Signup"):
         if (len(username) >= 6) and (len(password) >= 6):
             if (users_dict == None or (username not in users_dict.keys())):
                 st.success("Congratulations on making your new account!")
+                city, state = user_location()
                 st.balloons()
                 new_user_ref = db.reference(f'users/{username}')
-                new_user_ref.set({'password': password, 'points': 0, 'plants': ["PLACEHOLDER"], "animals" : ["PLACEHOLDER"], "flowers" : ["PLACEHOLDER"], "pollinators" : ["PLACEHOLDER"], "non_native":["PLACEHOLDER"]})
+                new_user_ref.set({'password': password, 'points': 0, 'plants': ["PLACEHOLDER"], "animals" : ["PLACEHOLDER"], "flowers" : ["PLACEHOLDER"], "pollinators" : ["PLACEHOLDER"], "non_native":["PLACEHOLDER"], "city":city, "state":state})
                 st.switch_page(r"Homepage.py")
             else:
                 st.error("**Username not availabe**")

@@ -53,7 +53,3 @@ with st.form("Login"):
 
             
 st.page_link(page = r"pages/Sign Up.py", label = "Sign Up")
-
-# Testing firebase database
-# db.reference("users").set({})
-# db.reference("users").push({"name": "bob", "password": 123})
