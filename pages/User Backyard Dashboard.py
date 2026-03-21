@@ -172,7 +172,7 @@ try:
 
     st.write("**Possible New Additions to Look Out for:**")
     for i in response.text.split("\n"):
-        species = i.split("||")[0]
+        species = i.split("||")[0].replace("-","")
         species_type = i.split("||")[1]
 
         recc_info, recc_profile = st.columns(2)
