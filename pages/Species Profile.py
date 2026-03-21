@@ -49,4 +49,4 @@ if "extract" in response:
     st.write(response["extract"])
 
 st.subheader("**Extra Info**")
-st.page_link(f"https://en.wikipedia.org/wiki/{first_title}", icon = ":material/info:")
+st.page_link(label = "Wikipedia", page = f"https://en.wikipedia.org/wiki/{first_title}", icon = ":material/info:")
