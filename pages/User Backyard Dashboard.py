@@ -177,7 +177,7 @@ try:
 
         recc_info, recc_profile = st.columns(2)
         with recc_info:
-            st.write(f"{species}: :{color_map[species_type]}-badge{species_type}")
+            st.write(f"{species}: :{color_map[species_type]}-badge[{species_type}]")
         with recc_profile:
             st.page_link(page = r"pages/Species Profile.py", label = "Species Profile", query_params = {"species" : species, "type" : species_type})
 
