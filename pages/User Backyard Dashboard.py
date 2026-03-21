@@ -168,13 +168,13 @@ for i in set(non_native):
 try:
     response = client.models.generate_content(
     model="gemini-2.0-flash",
-    contents = f"Reccomend more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly. Current user's backyard {combined_species_list}. Only list out specific species with their common name in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - SPECIES_NAME||SPECIES TYPE: Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||SPECIES TYPE: Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||SPECIES TYPE: Plant, Animal, Flowering Plant or Pollinator")
+    contents = f"Reccomend more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly. Current user's backyard {combined_species_list}. Only list out specific species with their common name in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator")
 
     st.write("**Possible New Additions to Look Out for:**")
     for i in response.text.split("\n"):
         species = i.split("||")[0]
         species_type = i.split("||")[1]
-        st.write(response.text)
+
         recc_info, recc_profile = st.columns(2)
         with recc_info:
             st.write(f"{species}: :{color_map[species_type]}-badge{species_type}")
