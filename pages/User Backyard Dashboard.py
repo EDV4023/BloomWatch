@@ -30,27 +30,27 @@ def clean_list(lst):
 plants = clean_list(user_data["plants"])
 new_plants = []
 for p in plants:
-    new_plants.append((p,":green[Plant]"))
+    new_plants.append((p,":green-badge[Plant]"))
 
 animals = clean_list(user_data["animals"])
 new_animals = []
 for a in animals:
-    new_animals.append((a,":blue[Animal]"))
+    new_animals.append((a,":blue-badge[Animal]"))
 
 flowers = clean_list(user_data["flowers"])
 new_flowers = []
 for f in flowers:
-    new_flowers.append((f,":violet[Flowering Plant]"))
+    new_flowers.append((f,":violet-badge[Flowering Plant]"))
 
 pollinators = clean_list(user_data["pollinators"])
 new_pollinators = []
 for pl in pollinators:
-    new_pollinators.append((pl,":yellow[Pollinator]"))
+    new_pollinators.append((pl,":yellow-badge[Pollinator]"))
 
 non_native = clean_list(user_data["non_native"])
 new_nn = []
 for n in non_native:
-    new_nn.append((n,":red[Non-Native/Invasive Species]"))
+    new_nn.append((n,":red-badge[Non-Native/Invasive Species]"))
 
 total_points = user_data["points"]
 
@@ -154,14 +154,32 @@ with no:
 
 st.divider()
 
+color_map = {
+    "Plant" : "green",
+    "Animal" : "blue",
+    "Flowering Plant": "violet",
+    "Pollinator": "yellow",
+    "Non-Native/Invasive Species": "red"
+}
+
 st.subheader("Improvement Guide")
 for i in set(non_native):
     st.write("Remove: *:red["+i+"]*")
 try:
     response = client.models.generate_content(
     model="gemini-2.0-flash",
-    contents = f"Reccomend more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly. Current user's backyard {combined_species_list}. Only list out specific species with their common name in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - Add SPECIES_NAME \n - Add SPECIES_NAME \n - Add SPECIES_NAME")
+    contents = f"Reccomend more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly. Current user's backyard {combined_species_list}. Only list out specific species with their common name in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - SPECIES_NAME||SPECIES TYPE: Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||SPECIES TYPE: Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||SPECIES TYPE: Plant, Animal, Flowering Plant or Pollinator")
+
     st.write("**Possible New Additions to Look Out for:**")
-    st.write(response.text)
+    for i in response.text.split("\n"):
+        species = i.split("||")[0]
+        species_type = i.split("||")[1]
+
+        recc_info, recc_profile = st.columns(2)
+        with recc_info:
+            st.write(f"{species}: :{color_map[species_type]}-badge{species_type}")
+        with recc_profile:
+            st.page_link(page = r"pages/Species Profile.py", label = "Species Profile", query_params = {"species" : species, "type" : species_type})
+
 except:
     st.space()
