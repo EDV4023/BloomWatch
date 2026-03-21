@@ -127,32 +127,31 @@ if combined_species_list:
     st.subheader("Species Breakdown")
     st.bar_chart(species_count)
 
+    st.divider()
+
+    st.subheader("Unique Species")
+
+    pl, an, fl, po, no = st.tabs(["Plants", "Animals", "Flowering Plants", "Pollinators", "Non-Native"])
+
+    with pl:
+        for i in set(plants):
+            st.write("*"+i+"*")
+    with an:
+        for i in set(animals):
+            st.write("*"+i+"*")
+    with fl:
+        for i in set(flowers):
+            st.write("*"+i+"*")
+    with po:
+        for i in set(pollinators):
+            st.write("*"+i+"*")
+    with no:
+        for i in set(non_native):
+            st.write("*"+i+"*")
+
+    st.divider()
 else:
     st.info("No sightings yet. Start exploring your backyard!")
-
-st.divider()
-
-st.subheader("Unique Species")
-
-pl, an, fl, po, no = st.tabs(["Plants", "Animals", "Flowering Plants", "Pollinators", "Non-Native"])
-
-with pl:
-    for i in set(plants):
-        st.write("*"+i+"*")
-with an:
-    for i in set(animals):
-        st.write("*"+i+"*")
-with fl:
-    for i in set(flowers):
-        st.write("*"+i+"*")
-with po:
-    for i in set(pollinators):
-        st.write("*"+i+"*")
-with no:
-    for i in set(non_native):
-        st.write("*"+i+"*")
-
-st.divider()
 
 color_map = {
     "Plant" : "green",
