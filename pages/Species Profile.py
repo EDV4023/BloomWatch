@@ -36,7 +36,7 @@ color_map = {
     "Non-Native/Invasive Species": "red"
 }
 
-st.title(f"**{st.query_params.species}**")
+st.title(st.query_params.species)
 st.badge(label = st.query_params.type, color = color_map[st.query_params.type])
 
 if "thumbnail" in response:
