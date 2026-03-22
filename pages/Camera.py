@@ -63,7 +63,7 @@ def user_location() -> tuple[str, str] | None:
     
     
 
-# Recognized image to be plant, animal, or neither and assigns points (10 for pollinators, 5 for flowers, 3 for animals, 1 for plants, and 0 if netiher)
+# Recognized image to be plant, animal, or neither and assigns points (20 for pollinators, 10 for flowers, 5 for animals, 2 for plants, and 0 if netiher)
 # Tested: Working
 def recognize(image, city, state) -> tuple[str, int]:
     image.seek(0)
@@ -84,14 +84,14 @@ Location: {city}, {state}, USA
 Instructions:
 1. Identify the species in the image (Common name).
 2. Determine if the species is indigenous to the specific ecosystem of {city}, {state}. 
-   - If it was introduced from another continent or region and only if it disrupts the local environment, it is ok if it is harmless such as house plants for showcase (e.g., Chinese Tallow, Emerald Ash Borer, Kudzu), it MUST be classified as "Non-Native" with a score of -1.
+   - If it was introduced from another continent or region and only if it actively harms or disrupts the local environment and is considered invasive, it is ok if it is harmless such as house plants for showcase (e.g., Chinese Tallow, Emerald Ash Borer, Kudzu), it MUST be classified as "Non-Native" with a score of -1.
 3. Apply the following hierarchy for the score:
    - Non-native/Invasive = -1
    - Neither plant nor animal = 0
-   - Regular plant/vegetation (non-flowering) = 1
-   - Wild animal (non-pollinator) = 3
-   - Flowering plant = 5
-   - Pollinator = 10
+   - Regular plant/vegetation (non-flowering) = 2
+   - Wild animal (non-pollinator) = 5
+   - Flowering plant = 10
+   - Pollinator = 20
 
 Constraint: Do not include greetings, explanations, or Markdown formatting. 
 
@@ -131,52 +131,60 @@ def identify(img):
             users_ref.update({"non_native":users_dict["non_native"],"points":users_dict["points"]})
         case 0:
             st.info("This is not a new unique species.")
-        case 1:
+        case 2:
             if species in species_list:
-                st.success(f"You found the **{species}** species (Type: Regular Plant)! No points were gained since this is not a new species")
+                st.session_state.points += 1
+                st.success(f"You found the **{species}** species (Type: Regular Plant) and gained **1** points since this is not a new unique species.")
                 users_dict["plants"].append(species)
-                users_ref.update({"plants":users_dict["plants"]})
+                users_dict["points"] += 1
+                users_ref.update({"plants":users_dict["plants"],"points":users_dict["points"]})
                 return
-            st.session_state.points += 1
+            st.session_state.points += 2
             st.success(f"You found the **{species}** species (Type: Regular Plant) and gained **{points}** points!")
             users_dict["plants"].append(species)
-            users_dict["points"] += 1
+            users_dict["points"] += 2
             users_ref.update({"plants":users_dict["plants"],"points":users_dict["points"]})
-
-        case 3:
-            if species in species_list:
-                st.success(f"You found the **{species}** species (Type: Regular Animal)! No points were gained since this is not a new species")
-                users_dict["animals"].append(species)
-                users_ref.update({"animals":users_dict["animals"]})
-                return
-            st.session_state.points += 3
-            st.success(f"You found the **{species}** species (Type: Regular Animal) and gained **{points}** points!")
-            users_dict["animals"].append(species)
-            users_dict["points"] += 3
-            users_ref.update({"animals":users_dict["animals"],"points":users_dict["points"]})
 
         case 5:
             if species in species_list:
-                st.success(f"You found the **{species}** species (Type: Flower)! No points were gained since this is not a new species")
-                users_dict["flowers"].append(species)
-                users_ref.update({"flowers":users_dict["flowers"]})
+                st.session_state.points += 3
+                st.success(f"You found the **{species}** species (Type: Animal) and gained **3** points since this is not a new unique species.")
+                users_dict["animals"].append(species)
+                users_dict["points"] += 3
+                users_ref.update({"animals":users_dict["animals"],"points":users_dict["points"]})
                 return
             st.session_state.points += 5
-            st.success(f"You found the **{species}** species (Type: Flower) and gained **{points}** points!")
-            users_dict["flowers"].append(species)
+            st.success(f"You found the **{species}** species (Type: Regular Animal) and gained **{points}** points!")
+            users_dict["animals"].append(species)
             users_dict["points"] += 5
-            users_ref.update({"flowers": users_dict["flowers"],"points":users_dict["points"]})
+            users_ref.update({"animals":users_dict["animals"],"points":users_dict["points"]})
 
         case 10:
             if species in species_list:
-                st.success(f"You found the **{species}** species (Type: Pollinator)! No points were gained since this is not a new species")
-                users_dict["pollinators"].append(species)
-                users_ref.update({"pollinators":users_dict["pollinators"]})
+                st.session_state.points += 5
+                st.success(f"You found the **{species}** species (Type: Flower) and gained **5** points since this is not a new species.")
+                users_dict["flowers"].append(species)
+                users_dict["points"] += 5
+                users_ref.update({"flowers": users_dict["flowers"],"points":users_dict["points"]})
                 return
             st.session_state.points += 10
+            st.success(f"You found the **{species}** species (Type: Flower) and gained **{points}** points!")
+            users_dict["flowers"].append(species)
+            users_dict["points"] += 10
+            users_ref.update({"flowers": users_dict["flowers"],"points":users_dict["points"]})
+
+        case 20:
+            if species in species_list:
+                st.session_state.points += 10
+                st.success(f"You found the **{species}** species (Type: Pollinator) and gained **10** points since this is not a new species.")
+                users_dict["pollinators"].append(species)
+                users_dict["points"] += 10
+                users_ref.update({"pollinators": users_dict["pollinators"],"points":users_dict["points"]})
+                return
+            st.session_state.points += 20
             st.success(f"You found the **{species}** species (Type: Pollinator) and gained **{points}** points!")
             users_dict["pollinators"].append(species)
-            users_dict["points"] += 10
+            users_dict["points"] += 20
             users_ref.update({"pollinators": users_dict["pollinators"],"points":users_dict["points"]})
 
 
