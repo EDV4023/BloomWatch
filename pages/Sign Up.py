@@ -22,9 +22,9 @@ users_dict = users_ref.get()
 
 # Tested: Working
 def user_location_list() -> list[str]:
-    csv_path = "uscities.csv"
+    csv_path = r"uscities.csv"
     final_list = []
-    df = pandas.read_csv(csv_path, usecols = ["city", "state_name"])
+    df = pandas.read_csv(csv_path)
     for i in df.index:
         final_list.append(f"{df.loc[i, "city"]}, {df.loc[i, "state_name"]}")
     
