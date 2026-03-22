@@ -38,12 +38,7 @@ with st.form("Signup"):
     password = st.text_input("**Password**", help = "Enter a strong password", type = "password", placeholder = "Enter password", max_chars = 12)
     
     display_list = user_location_list()
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write("**Location:**")
-    with col2:
-        location = st.selectbox("Location", display_list, index = None, placeholder = "Select your current location...")
+    location = st.selectbox("Location", display_list, index = None, placeholder = "Select your current location...")
     
     signup = st.form_submit_button("Sign Up")
     if signup:
