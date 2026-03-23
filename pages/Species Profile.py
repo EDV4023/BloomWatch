@@ -2,14 +2,34 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 
+color_map = {
+    "Plant" : "green",
+    "Animal" : "blue",
+    "Flowering Plant": "violet",
+    "Pollinator": "yellow",
+    "Non-Native/Invasive Species": "red"
+}
+
 if ("species" not in st.query_params) or ("type" not in st.query_params):
     # Prevent user from bypassing authentication
     if "loggedin" not in st.session_state:
         st.switch_page(r"Homepage.py")
     st.switch_page(r"pages/User Backyard Dashboard.py")
 
+if st.query_params.type not in color_map:
+    # Prevent user from bypassing authentication
+    if "loggedin" not in st.session_state:
+        st.switch_page(r"Homepage.py")
+    st.switch_page(r"pages/User Backyard Dashboard.py")
+
+
 headers={"User-Agent": "BloomWatch/1.0"}
-search_url = f"https://en.wikipedia.org/w/index.php?search={st.query_params.species} ({st.query_params.type})&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1"
+
+if "Invasive" in st.query_params:
+    search_url = f"https://en.wikipedia.org/w/index.php?search={st.query_params.species}&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1"
+else:
+    search_url = f"https://en.wikipedia.org/w/index.php?search={st.query_params.species} ({st.query_params.type})&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1"
+
 search_response = requests.get(search_url, headers = headers)
 soup = BeautifulSoup(search_response.text, "html.parser")
 
@@ -28,13 +48,6 @@ first_title = first_result.find("a").get("title")
 url = fr"https://en.wikipedia.org/api/rest_v1/page/summary/{title.replace(" ", "_")}"
 response = requests.get(url, headers = headers).json()
 
-color_map = {
-    "Plant" : "green",
-    "Animal" : "blue",
-    "Flowering Plant": "violet",
-    "Pollinator": "yellow",
-    "Non-Native/Invasive Species": "red"
-}
 
 st.title(st.query_params.species)
 st.badge(label = st.query_params.type, color = color_map[st.query_params.type])

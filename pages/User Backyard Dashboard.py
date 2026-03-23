@@ -167,7 +167,7 @@ for i in set(non_native):
 try:
     response = client.models.generate_content(
     model="gemini-2.0-flash",
-    contents = f"Reccomend more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly. Current user's backyard {combined_species_list}. Only list out specific species with their common name in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator")
+    contents = f"Reccomend more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly. Current user's backyard {combined_species_list}. Only list out specific species with their COMMON NAME (No Scientific Name) in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator")
 
     st.write("**Possible New Additions to Look Out for:**")
     for i in response.text.split("\n"):
