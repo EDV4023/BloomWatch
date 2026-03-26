@@ -30,6 +30,9 @@ bird_soup = BeautifulSoup(allaboutbirds_search_response.text, "html.parser")
 
 find_hero_wrap = bird_soup.find_all("section", attrs = {"class" : "hero-wrap"})
 
+st.write(f"https://www.allaboutbirds.org/guide/{st.query_params.species.replace(" ", "_").title()}/")
+st.write(find_hero_wrap)
+
 if not find_hero_wrap:
     if "Invasive" in st.query_params.type:
         search_url = f"https://en.wikipedia.org/w/index.php?search={st.query_params.species}&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1"
