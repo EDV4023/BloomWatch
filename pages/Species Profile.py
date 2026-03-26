@@ -79,10 +79,10 @@ else:
     bird_map_url = f"https://www.allaboutbirds.org/guide/{st.query_params.species.replace(" ", "_")}/maps-range" 
     range_map_response = requests.get(bird_map_url, headers = headers)
     range_map_soup = BeautifulSoup(range_map_response.text, "html.parser")
-
+    st.write(bird_map_url)
     range_map = range_map_soup.find("img", attrs = {"id" : "dlwhls-interchange"})
     st.write(range_map)
-    
+
     image_list = [
         dict(text = st.query_params.species, img = image_link),
         dict(text = f"{st.query_params.species} Range Map", img = range_map)
