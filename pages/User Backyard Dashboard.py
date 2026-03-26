@@ -163,11 +163,11 @@ color_map = {
 
 st.subheader("Improvement Guide")
 for i in set(non_native):
-    st.write("Remove: *:red["+i+"]*")
+    st.write("- Remove: *:red["+i+"]*")
 try:
     response = client.models.generate_content(
     model="gemini-2.0-flash",
-    contents = f"Reccomend more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly. Current user's backyard {combined_species_list}. Only list out specific species with their COMMON NAME (No Scientific Name) in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator")
+    contents = f"Reccomend 10 more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly for the user's backyard. Reccomend species that can be found in the user's backyard at their location, so nothing outlandish. Current user's backyard {combined_species_list}. Only list out specific species with their COMMON NAME (No Scientific Name) in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator")
 
     st.write("**Possible New Additions to Look Out for:**")
     for i in response.text.split("\n"):
@@ -176,7 +176,7 @@ try:
 
         recc_info, recc_profile = st.columns(2)
         with recc_info:
-            st.write(f"{species}: :{color_map[species_type]}-badge[{species_type}]")
+            st.write(f"- {species}: :{color_map[species_type]}-badge[{species_type}]")
         with recc_profile:
             st.page_link(page = r"pages/Species Profile.py", label = "Species Profile", query_params = {"species" : species, "type" : species_type})
 
