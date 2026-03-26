@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
+from streamlit_carousel import carousel
 
 color_map = {
     "Plant" : "green",
@@ -73,7 +74,13 @@ if not find_hero_wrap:
 else:
     image_link = find_hero_wrap[0].get("data-interchange").split(",")[0].replace("[","").replace("]","").split(",")[0]
 
-    scientific_name = bird_soup.select(".species-info em")[0].text 
+    scientific_name = bird_soup.select(".species-info em")[0].text
+
+    bird_map_url = f"https://www.allaboutbirds.org/guide/{st.query_params.species.replace(" ", "_")}/maps-range" 
+    range_map_response = requests.get(bird_map_url, headers = headers)
+    range_map_soup = BeautifulSoup(range_map_response.text, "html.parser")
+
+    range_map = range_map_soup.find("img", attrs = {"id" : "dlwhls-interchange"}).get("src")
 
     st.title(f"{st.query_params.species} (*{scientific_name}*)")
     st.badge(label = st.query_params.type, color = color_map[st.query_params.type])
