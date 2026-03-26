@@ -26,7 +26,7 @@ if st.query_params.type not in color_map:
 headers={"User-Agent": "BloomWatch/1.0"}
 
 allaboutbirds_search_response = requests.get(f"https://www.allaboutbirds.org/guide/{st.query_params.species.replace(" ", "_").title()}/")
-bird_soup = BeautifulSoup(allaboutbirds_search_response, "html.parser")
+bird_soup = BeautifulSoup(allaboutbirds_search_response.text, "html.parser")
 
 find_hero_wrap = bird_soup.find_all("section", attrs = {"class" : "hero-wrap"})
 
