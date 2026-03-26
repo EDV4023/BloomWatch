@@ -84,14 +84,14 @@ else:
     st.write(range_map)
 
     image_list = [
-        dict(title = "Species", text = st.query_params.species, img = image_link),
-        dict(title = "Range Map",text = f"{st.query_params.species} Range Map", img = range_map)
+        dict(title = st.query_params.species, img = image_link),
+        dict(title = f"{st.query_params.species} Range Map", img = range_map)
     ]
 
     st.title(f"{st.query_params.species} (*{scientific_name}*)")
     st.badge(label = st.query_params.type, color = color_map[st.query_params.type])
 
-    carousel(items = image_list)
+    carousel(items = image_list, container_height = 600)
 
     audio_link = find_hero_wrap[0].find("div", attrs = {"class" : "jp-jplayer player-audio"}).get("name")
     st.audio(audio_link)
