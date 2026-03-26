@@ -21,11 +21,11 @@ We hope to send our data of species around the US to scientists and researchers.
 
 ## Built With
 - firebase
-- geopy
 - google
 - google-cloud
-- nomatim
+- requests
+- BeautifulSoup
 - numpy
 - python
 - streamlit
-- Nomatim
+- opencv
