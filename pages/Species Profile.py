@@ -80,8 +80,9 @@ else:
     range_map_response = requests.get(bird_map_url, headers = headers)
     range_map_soup = BeautifulSoup(range_map_response.text, "html.parser")
 
-    range_map = range_map_soup.find("img", attrs = {"id" : "dlwhls-interchange"}).get("src")
-
+    range_map = range_map_soup.find("img", attrs = {"id" : "dlwhls-interchange"})
+    st.write(range_map)
+    
     image_list = [
         dict(text = st.query_params.species, img = image_link),
         dict(text = f"{st.query_params.species} Range Map", img = range_map)
