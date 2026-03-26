@@ -84,8 +84,8 @@ else:
     st.write(range_map)
 
     image_list = [
-        dict(text = st.query_params.species, img = image_link),
-        dict(text = f"{st.query_params.species} Range Map", img = range_map)
+        dict(title = "Species", text = st.query_params.species, img = image_link),
+        dict(title = "Range Map",text = f"{st.query_params.species} Range Map", img = range_map)
     ]
 
     st.title(f"{st.query_params.species} (*{scientific_name}*)")
