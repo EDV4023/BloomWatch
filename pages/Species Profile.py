@@ -82,10 +82,15 @@ else:
 
     range_map = range_map_soup.find("img", attrs = {"id" : "dlwhls-interchange"}).get("src")
 
+    image_list = [
+        dict(text = st.query_params.species, img = image_link),
+        dict(text = f"{st.query_params.species} Range Map", img = range_map)
+    ]
+
     st.title(f"{st.query_params.species} (*{scientific_name}*)")
     st.badge(label = st.query_params.type, color = color_map[st.query_params.type])
 
-    st.image(image_link)
+    carousel(items = image_list)
 
     audio_link = find_hero_wrap[0].find("div", attrs = {"class" : "jp-jplayer player-audio"}).get("name")
     st.audio(audio_link)
