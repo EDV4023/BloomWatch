@@ -81,6 +81,7 @@ else:
     range_map_soup = BeautifulSoup(range_map_response.text, "html.parser")
 
     range_map = range_map_soup.find("img", attrs = {"aria-describedby" : "migration-description"}).get("src")
+    st.write( range_map_soup.find("img", attrs = {"aria-describedby" : "migration-description"}))
     st.write(range_map)
 
     image_list = [
