@@ -30,8 +30,6 @@ bird_soup = BeautifulSoup(allaboutbirds_search_response.text, "html.parser")
 
 find_hero_wrap = bird_soup.find_all("section", attrs = {"class" : "hero-wrap"})
 
-st.write(find_hero_wrap[0])
-
 if not find_hero_wrap:
     if "Invasive" in st.query_params.type:
         search_url = f"https://en.wikipedia.org/w/index.php?search={st.query_params.species}&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1"
@@ -75,7 +73,9 @@ if not find_hero_wrap:
 else:
     image_link = find_hero_wrap[0].get("data-interchange").split(",")[0].replace("[","").replace("]","").split(",")[0]
 
-    st.title(st.query_params.species)
+    scientific_name = bird_soup.select(".species-info em")[0] 
+
+    st.title(f"{st.query_params.species} (*{scientific_name}*)")
     st.badge(label = st.query_params.type, color = color_map[st.query_params.type])
 
     st.image(image_link)
