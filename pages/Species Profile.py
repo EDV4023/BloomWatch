@@ -79,8 +79,8 @@ else:
     bird_map_url = f"https://www.allaboutbirds.org/guide/{st.query_params.species.replace(" ", "_")}/maps-range" 
     range_map_response = requests.get(bird_map_url, headers = headers)
     range_map_soup = BeautifulSoup(range_map_response.text, "html.parser")
-    st.write(bird_map_url)
-    range_map = range_map_soup.find("img", attrs = {"id" : "dlwhls-interchange"})
+
+    range_map = range_map_soup.find("img", attrs = {"aria-describedby" : "migration-description"})
     st.write(range_map)
 
     image_list = [
