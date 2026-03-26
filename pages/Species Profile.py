@@ -73,12 +73,15 @@ if not find_hero_wrap:
     st.page_link(label = "Wikipedia", page = f"https://en.wikipedia.org/wiki/{first_title}", icon = ":material/info:")
 
 else:
-    image_link = find_hero_wrap[0].get("style").split("(\"")[1].split("\")")[0]
+    image_link = find_hero_wrap[0].get("data-interchange").split(",")[0].replace("[","").replace("]","").split(",")[0]
 
     st.title(st.query_params.species)
     st.badge(label = st.query_params.type, color = color_map[st.query_params.type])
 
     st.image(image_link)
+
+    audio_link = find_hero_wrap[0].find("div", attrs = {"class" : "jp-jplayer player-audio"}).get("name")
+    st.audio(audio_link)
 
     overview = bird_soup.select(".speciesInfoCard.float.clearfix p")[0].text
 
