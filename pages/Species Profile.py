@@ -25,11 +25,12 @@ if st.query_params.type not in color_map:
 
 headers={"User-Agent": "BloomWatch/1.0"}
 
-allaboutbirds_search_response = requests.get(f"https://www.allaboutbirds.org/guide/{st.query_params.species.replace(" ", "_").title()}/")
+allaboutbirds_search_response = requests.get(f"https://www.allaboutbirds.org/guide/{st.query_params.species.replace(" ", "_").title()}/", headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"})
 bird_soup = BeautifulSoup(allaboutbirds_search_response.text, "html.parser")
 
 find_hero_wrap = bird_soup.find_all("section", attrs = {"class" : "hero-wrap"})
 
+st.write(bird_soup.prettify())
 st.write(f"https://www.allaboutbirds.org/guide/{st.query_params.species.replace(" ", "_").title()}/")
 st.write(find_hero_wrap)
 
