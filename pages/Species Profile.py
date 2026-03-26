@@ -73,7 +73,7 @@ if not find_hero_wrap:
 else:
     image_link = find_hero_wrap[0].get("data-interchange").split(",")[0].replace("[","").replace("]","").split(",")[0]
 
-    scientific_name = bird_soup.select(".species-info em")[0] 
+    scientific_name = bird_soup.select(".species-info em")[0].text 
 
     st.title(f"{st.query_params.species} (*{scientific_name}*)")
     st.badge(label = st.query_params.type, color = color_map[st.query_params.type])
