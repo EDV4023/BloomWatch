@@ -81,7 +81,7 @@ else:
     range_map_soup = BeautifulSoup(range_map_response.text, "html.parser")
 
     range_map = range_map_soup.find("img", attrs = {"aria-describedby" : "migration-description"}).get("data-interchange").split(",")[0].replace("[","").replace("]","").split(",")[0]
-    st.write(range_map)
+    
 
     image_list = [
         dict(title = "Species", text = st.query_params.species, img = image_link),
