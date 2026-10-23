@@ -28,6 +28,39 @@ st.session_state.init_run = False
 users_ref = db.reference('users')
 users_dict = users_ref.get()
 
+st.html("""
+<style>
+    /* Global App Background & Text */
+    .stApp {
+        background-color: #0b0f19;
+        color: #f3f4f6;
+    }
+    
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] {
+        background-color: #111827;
+        border-right: 1px solid #1f2937;
+    }
+    
+    /* Card & Container Polish */
+    div.stMarkdown, div.stButton {
+        color: #f3f4f6;
+    }
+    
+    /* Accent Buttons */
+    .stButton button {
+        background-color: #10b981;
+        color: #ffffff;
+        border: none;
+        border-radius: 0.5rem;
+    }
+    .stButton button:hover {
+        background-color: #059669;
+        color: #ffffff;
+    }
+</style>
+""")
+
 with st.form("Login"):
     st.header('Log In')
     username = st.text_input("**Username**", help = "Name you are seen with online", placeholder = "Enter username", max_chars = 12)

@@ -16,6 +16,39 @@ client = genai.Client(api_key = st.secrets.API_KEY)
 if "loggedin" not in st.session_state:
     st.switch_page(r"Homepage.py")
 
+st.html("""
+<style>
+    /* Global App Background & Text */
+    .stApp {
+        background-color: #0b0f19;
+        color: #f3f4f6;
+    }
+    
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] {
+        background-color: #111827;
+        border-right: 1px solid #1f2937;
+    }
+    
+    /* Card & Container Polish */
+    div.stMarkdown, div.stButton {
+        color: #f3f4f6;
+    }
+    
+    /* Accent Buttons */
+    .stButton button {
+        background-color: #10b981;
+        color: #ffffff;
+        border: none;
+        border-radius: 0.5rem;
+    }
+    .stButton button:hover {
+        background-color: #059669;
+        color: #ffffff;
+    }
+</style>
+""")
+
 #Tested: Working
 def resize(image):
     max_side = 1200

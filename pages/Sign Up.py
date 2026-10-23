@@ -16,6 +16,39 @@ if "init_run" not in st.session_state:
     app = initialize_firebase()
 st.session_state.init_run = False
 
+st.html("""
+<style>
+    /* Global App Background & Text */
+    .stApp {
+        background-color: #0b0f19;
+        color: #f3f4f6;
+    }
+    
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] {
+        background-color: #111827;
+        border-right: 1px solid #1f2937;
+    }
+    
+    /* Card & Container Polish */
+    div.stMarkdown, div.stButton {
+        color: #f3f4f6;
+    }
+    
+    /* Accent Buttons */
+    .stButton button {
+        background-color: #10b981;
+        color: #ffffff;
+        border: none;
+        border-radius: 0.5rem;
+    }
+    .stButton button:hover {
+        background-color: #059669;
+        color: #ffffff;
+    }
+</style>
+""")
+
 #Load Users Safely
 users_ref = db.reference('users')
 users_dict = users_ref.get()
