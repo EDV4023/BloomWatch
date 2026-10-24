@@ -1,21 +1,21 @@
-import geocoder
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+import streamlit as st
 from google import genai
 from google.genai import types
-import numpy as np
-import cv2
-import streamlit as st
-import firebase_admin
-from firebase_admin import credentials, db
-import requests
+from PIL import Image
+import io
+import json
+from firebase_admin import db
 
-client = genai.Client(api_key = st.secrets.API_KEY)
+st.set_page_config(
+    page_title="BloomWatch - AI Field Scanner",
+    layout="wide"
+)
 
 # Prevent user from bypassing authentication
 if "loggedin" not in st.session_state:
-    st.switch_page(r"Homepage.py")
+    st.switch_page("Homepage.py")
 
+# Global Dark Theme Styling
 st.html("""
 <style>
     /* Global App Background & Text */
@@ -35,12 +35,13 @@ st.html("""
         color: #f3f4f6;
     }
     
-    /* Accent Buttons */
+    /* Primary Accent Buttons */
     .stButton button {
         background-color: #10b981;
         color: #ffffff;
         border: none;
         border-radius: 0.5rem;
+        font-weight: 600;
     }
     .stButton button:hover {
         background-color: #059669;
@@ -49,205 +50,99 @@ st.html("""
 </style>
 """)
 
-
-st.set_page_config(page_title="BloomWatch - AI Scanner", layout="wide")
-
-st.html("""
-<style>
-    .stApp { background-color: #0b0f19; color: #f3f4f6; }
-    [data-testid="stSidebar"] { background-color: #111827; border-right: 1px solid #1f2937; }
-    .card { background-color: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 1.5rem; }
-</style>
-""")
-
 st.title("AI Field Scanner")
-st.markdown("<p style='color: #9ca3af;'>Capture or upload a picture for instant taxonomic identification.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color: #9ca3af; margin-bottom: 1.5rem;'>Capture or upload a picture for instant taxonomic identification.</p>", unsafe_allow_html=True)
 
-# --- YOUR ORIGINAL BACKEND LOGIC & CAMERA / GEMINI CODE REMAINS UNCHANGED BELOW ---
+# Initialize Gemini client using app secrets
+try:
+    client = genai.Client(api_key=st.secrets.API_KEY)
+except Exception as e:
+    st.error("Gemini API key not found in secrets. Please configure st.secrets.API_KEY.")
+    st.stop()
 
-#Tested: Working
-def resize(image):
-    max_side = 1200
-    height, width = image.shape[0:2]
-    scale = max_side / max(height, width)
+# Input Method Selection tabs/radio
+input_method = st.radio("Choose Input Method", ["Upload Image", "Capture from Camera"], horizontal=True)
 
-    if scale < 1:
-        image = cv2.resize(image, (int(scale*width),int(scale*height)))
-    return image    
+uploaded_image = None
 
-# # Tested: Working
-# def get_latlng() -> tuple[float, float]:
-#     g = geocoder.ip("me") # Get user's current IP: Need to ask user for permission to access location data
-
-#     # If latitude and longitude attribute exsits then extract location data
-#     if g.latlng:
-#         lat, long = g.latlng
-#         return lat, long
-#     else:
-#         return None
-
-# # Tested: Working
-# def convert_latlng_to_city(lat: float, long: float) -> tuple[str, str] | None:
-#     geolocator = Nominatim(user_agent = "backyard_environmental_diversity_checker | edanvaiz@gmail.com")
-
-#     try:
-#         location = geolocator.reverse(f"{lat},{long}")
-
-#         # Obtain postal code/zip code
-#         if location and "address" in location.raw:
-#             address = location.raw["address"]
-#             return address["town"], address["state"]
-#         return None
-#     except (GeocoderTimedOut, GeocoderServiceError):
-#         return None
-
-# Tested: Working
-def user_location() -> tuple[str, str] | None:
-    users_ref = db.reference(f"users/{st.session_state.username}")
-    users_dict = users_ref.get()
-    if users_dict:
-        return users_dict["city"], users_dict["state"]
+with st.container(border=True):
+    if input_method == "Upload Image":
+        uploaded_file = st.file_uploader("Upload a plant, flower, or animal image", type=["jpg", "jpeg", "png"])
+        if uploaded_file is not None:
+            uploaded_image = Image.open(uploaded_file)
     else:
-        return None
+        camera_file = st.camera_input("Take a photo of wildlife")
+        if camera_file is not None:
+            uploaded_image = Image.open(camera_file)
+
+if uploaded_image is not None:
+    st.image(uploaded_image, caption="Selected Specimen Preview", width=500)
     
+    if st.button("Identify Specimen with AI", type="primary"):
+        with st.spinner("Querying Gemini AI & Taxonomic Databases..."):
+            try:
+                # Convert PIL image to bytes for Gemini API transmission
+                img_byte_arr = io.BytesIO()
+                image_format = uploaded_image.format if uploaded_image.format else 'JPEG'
+                uploaded_image.save(img_byte_arr, format=image_format)
+                img_bytes = img_byte_arr.getvalue()
+
+                prompt_text = (
+                    "Analyze this image. Identify the plant, flower, or bird accurately. "
+                    "Return a strict JSON object with exact keys: "
+                    "name (common name), latinName, family, description, isBird (boolean), "
+                    "wikipediaQuery (exact title string for Wikipedia article lookup). "
+                    "No markdown formatting outside the JSON."
+                )
+
+                response = client.models.generate_content(
+                    model="gemini-3.8-flash",
+                    contents=[
+                        prompt_text,
+                        types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg")
+                    ]
+                )
+
+                clean_json = response.text.replace("```json", "").replace("```", "").strip()
+                result = json.loads(clean_json)
+
+                st.session_state['last_identified'] = result
+
+            except Exception as e:
+                st.error(f"Analysis failed: {e}")
+
+# Display Identification Results and Backend Save Integration
+if 'last_identified' in st.session_state and st.session_state['last_identified']:
+    item = st.session_state['last_identified']
     
+    with st.container(border=True):
+        st.subheader(item.get('name'))
+        st.markdown(f"*{item.get('latinName')}* &bull; **Family:** {item.get('family')}")
+        st.markdown(f"<p style='color: #9ca3af; margin-top: 0.5rem;'>{item.get('description')}</p>", unsafe_allow_html=True)
 
-# Recognized image to be plant, animal, or neither and assigns points (20 for pollinators, 10 for flowers, 5 for animals, 2 for plants, and 0 if netiher)
-# Tested: Working
-def recognize(image, city, state) -> tuple[str, int]:
-    image.seek(0)
+        if st.button("Save to Account Log"):
+            try:
+                username = st.session_state.get("username")
+                if username:
+                    user_ref = db.reference(f"users/{username}")
+                    user_data = user_ref.get()
+                    
+                    # Determine category bucket based on taxonomy type
+                    category = "animals" if item.get("isBird") else "plants"
+                    current_list = user_data.get(category, [])
+                    
+                    if "PLACEHOLDER" in current_list:
+                        current_list = [item.get('name')]
+                    elif item.get('name') not in current_list:
+                        current_list.append(item.get('name'))
+                    
+                    new_points = int(user_data.get("points", 0)) + 1
 
-    image_bytes = image.getvalue()
-    image = np.frombuffer(image_bytes, np.uint8)
-    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-
-    image = resize(image)
-    response = client.models.generate_content(
-        model = "gemini-2.0-flash",
-        contents = [
-            types.Part.from_bytes(data = image_bytes, mime_type = "image/jpeg"),
-            f'''
-Task: Regional Ecological Identification
-Location: {city}, {state}, USA
-
-Instructions:
-1. Identify the species in the image (Common name).
-2. Determine if the species is indigenous to the specific ecosystem of {city}, {state}. 
-   - If it is an invasive species (e.g., Chinese Tallow, Emerald Ash Borer, Kudzu) that was introduced from another continent or region and actively harms or disrupts the local environment, it is ok if it is harmless such as house plants and potted plants for showcase, it MUST be classified as "Non-Native" with a score of -1.
-3. Apply the following hierarchy for the score:
-   - Invasive = -1
-   - Neither plant nor animal = 0
-   - Regular plant/vegetation (non-flowering) = 2
-   - Wild animal (non-pollinator) = 5
-   - Flowering plant = 10
-   - Pollinator = 20
-
-Constraint: Do not include greetings, explanations, or Markdown formatting. 
-
-Output Format: 
-Native or Non-Native||Common Name||Score
-
-If neither: "None||None||0"'''
-        ]
-    )
-
-    return response.text.split("||")[0], response.text.split("||")[1], response.text.split("||")[2]
-
-# Tested: Working
-def identify(img):
-    city, state = user_location()
-    native, species, points = recognize(img,city,state)
-    
-    # ======== Testing Code (Comment out when deployed) ========= 
-    # st.write(native)
-    # st.write(species)
-    # st.write(points)
-    # st.write(city)
-    # st.write(state)
-    # ======== End of Testing Code =======
-
-    points = int(points)
-    users_ref = db.reference(f"users/{st.session_state.username}")
-    users_dict = users_ref.get()
-    species_list = users_dict["plants"] + users_dict["animals"] + users_dict["flowers"] + users_dict["pollinators"]
-
-    match points:
-        case -1:
-            st.session_state.points -= 1
-            st.warning(f"You found the **{species}** species and lost 1 point. This species is non-native to your environment, please remove this species from your backyard.")
-            users_dict["non_native"].append(species)
-            users_dict["points"] += -1
-            users_ref.update({"non_native":users_dict["non_native"],"points":users_dict["points"]})
-        case 0:
-            st.info("This is not a new unique species.")
-        case 2:
-            if species in species_list:
-                st.session_state.points += 1
-                st.success(f"You found the **{species}** species (Type: Regular Plant) and gained **1** points since this is not a new unique species.")
-                users_dict["plants"].append(species)
-                users_dict["points"] += 1
-                users_ref.update({"plants":users_dict["plants"],"points":users_dict["points"]})
-                return
-            st.session_state.points += 2
-            st.success(f"You found the **{species}** species (Type: Regular Plant) and gained **{points}** points!")
-            users_dict["plants"].append(species)
-            users_dict["points"] += 2
-            users_ref.update({"plants":users_dict["plants"],"points":users_dict["points"]})
-
-        case 5:
-            if species in species_list:
-                st.session_state.points += 3
-                st.success(f"You found the **{species}** species (Type: Animal) and gained **3** points since this is not a new unique species.")
-                users_dict["animals"].append(species)
-                users_dict["points"] += 3
-                users_ref.update({"animals":users_dict["animals"],"points":users_dict["points"]})
-                return
-            st.session_state.points += 5
-            st.success(f"You found the **{species}** species (Type: Regular Animal) and gained **{points}** points!")
-            users_dict["animals"].append(species)
-            users_dict["points"] += 5
-            users_ref.update({"animals":users_dict["animals"],"points":users_dict["points"]})
-
-        case 10:
-            if species in species_list:
-                st.session_state.points += 5
-                st.success(f"You found the **{species}** species (Type: Flower) and gained **5** points since this is not a new species.")
-                users_dict["flowers"].append(species)
-                users_dict["points"] += 5
-                users_ref.update({"flowers": users_dict["flowers"],"points":users_dict["points"]})
-                return
-            st.session_state.points += 10
-            st.success(f"You found the **{species}** species (Type: Flower) and gained **{points}** points!")
-            users_dict["flowers"].append(species)
-            users_dict["points"] += 10
-            users_ref.update({"flowers": users_dict["flowers"],"points":users_dict["points"]})
-
-        case 20:
-            if species in species_list:
-                st.session_state.points += 10
-                st.success(f"You found the **{species}** species (Type: Pollinator) and gained **10** points since this is not a new species.")
-                users_dict["pollinators"].append(species)
-                users_dict["points"] += 10
-                users_ref.update({"pollinators": users_dict["pollinators"],"points":users_dict["points"]})
-                return
-            st.session_state.points += 20
-            st.success(f"You found the **{species}** species (Type: Pollinator) and gained **{points}** points!")
-            users_dict["pollinators"].append(species)
-            users_dict["points"] += 20
-            users_ref.update({"pollinators": users_dict["pollinators"],"points":users_dict["points"]})
-
-
-    st.session_state.history.append({
-        "species":species,
-        "points":points
-    })
-# st.title(":green[Wildlife] Scan")
-
-img = st.camera_input("Take an image of wildlife in you backyard")  # # Use when deployed
-# img = st.file_uploader("Test Image")
-
-if img:
-    st.image(img)
-
-if st.button("Identify", type = "primary") and img:
-    identify(img)
+                    user_ref.update({
+                        category: current_list,
+                        "points": new_points
+                    })
+                    st.session_state.points = new_points
+                    st.success("Specimen successfully saved to your account log and synchronized with Firebase!")
+            except Exception as e:
+                st.error(f"Failed to save to database: {e}")

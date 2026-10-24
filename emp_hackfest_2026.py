@@ -79,7 +79,7 @@ def recognize(image) -> tuple[str, int]:
 
     image = resize(image)
     response = client.models.generate_content(
-        model = "gemini-2.0-flash",
+        model = "gemini-3.8-flash",
         contents = [
             types.Part.from_bytes(data = image_bytes, mime_type = "image/jpeg"),
             "Do not include anything else but the format states, no greetings or extra details. Identify what if the following is a regular plant/vegetation, a wild animal, flower, pollinator or neither. Next, if it is either a plant or an animal, identify what type of plant or animal species it is and return that. If it is a plant, wild animal, pollinator, or flower, return 10 for pollinator, 5 for flower, 3 for wild animal, 1 for plant, or 0 if neither. The format should be \"Plant/Animal Species|1,3,5,or 10\". If it is neither plant nor animal then return None 0"

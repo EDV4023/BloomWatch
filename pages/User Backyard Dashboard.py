@@ -174,7 +174,7 @@ with st.container(border=True):
         st.write("- Remove: *:red["+i+"]*")
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.8-flash",
             contents = f"Reccomend 10 more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly for the user's backyard. Reccomend species that can be found in the user's backyard at their location, so nothing outlandish. Current user's backyard {combined_species_list}. Only list out specific species with their COMMON NAME (No Scientific Name) in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \nSPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \nSPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator"
         )
 
