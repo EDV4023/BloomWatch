@@ -1,10 +1,21 @@
 [theme]
+# Set the base theme to dark mode
 base = "dark"
+
+# Your glowing green accent color
 primaryColor = "#10b981"
+
+# Main app background color
 backgroundColor = "#0b0f19"
+
+# Sidebar and container background color
 secondaryBackgroundColor = "#111827"
+
+# Main text color
 textColor = "#f3f4f6"
-font = "sans serif"
+
+# Increase default font size globally (default is 16px)
+baseFontSize = 18
 
 [runner]
 magicEnabled = false
