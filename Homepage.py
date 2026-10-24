@@ -9,25 +9,13 @@ import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, db
 
-st.title("BloomWatch")
+st.set_page_config(
+    page_title="BloomWatch - Flora & Fauna Intelligence",
+    page_icon="🌿",
+    layout="wide"
+)
 
-# if "loggedin" not in st.session_state:
-#     st.session_state.loggedin = False
-
-# Ensure that firebase database does not continously reinitialize, so we store it in a cache
-@st.cache_resource
-def initialize_firebase():
-    cred = credentials.Certificate(dict(st.secrets.firebase_credentials))
-    return firebase_admin.initialize_app(cred, {"databaseURL" : st.secrets["database_url"]})
-
-if "init_run" not in st.session_state:
-    app = initialize_firebase()
-
-st.session_state.init_run = False
-
-users_ref = db.reference('users')
-users_dict = users_ref.get()
-
+# Global Dark Theme & Navigation Styling
 st.html("""
 <style>
     /* Global App Background & Text */
@@ -61,6 +49,22 @@ st.html("""
 </style>
 """)
 
+# Ensure that firebase database does not continously reinitialize, so we store it in a cache
+@st.cache_resource
+def initialize_firebase():
+    cred = credentials.Certificate(dict(st.secrets.firebase_credentials))
+    return firebase_admin.initialize_app(cred, {"databaseURL" : st.secrets["database_url"]})
+
+if "init_run" not in st.session_state:
+    app = initialize_firebase()
+
+st.session_state.init_run = False
+
+users_ref = db.reference('users')
+users_dict = users_ref.get()
+
+st.title("BloomWatch")
+
 with st.form("Login"):
     st.header('Log In')
     username = st.text_input("**Username**", help = "Name you are seen with online", placeholder = "Enter username", max_chars = 12)
@@ -81,8 +85,27 @@ with st.form("Login"):
             st.session_state.history = []
 
             st.switch_page(r"pages/Camera.py")
-
-
-
-            
+             
 st.page_link(page = r"pages/Sign Up.py", label = "Sign Up")
+
+# Define explicit navigation router to remove Homepage, Species Profile, and Sign Up from the sidebar
+# and add custom material icons to the remaining active pages.
+pg = st.navigation([
+    st.Page(
+        "pages/Camera.py", 
+        title="Identify & Capture", 
+        icon=":material/camera:"
+    ),
+    st.Page(
+        "pages/Leaderboard.py", 
+        title="Leaderboard", 
+        icon=":material/trophy:"
+    ),
+    st.Page(
+        "pages/User Backyard Dashboard.py", 
+        title="Backyard Dashboard", 
+        icon=":material/dashboard:"
+    ),
+])
+
+pg.run()
