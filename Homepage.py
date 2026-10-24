@@ -68,7 +68,7 @@ else:
                 login_username = st.text_input("Username", placeholder="Enter username", max_chars=12)
                 login_password = st.text_input("Password", type="password", placeholder="••••••••", max_chars=12)
                 
-                submitted_login = st.form_submit_button("Sign In")
+                submitted_login = st.form_submit_button("Sign In", type = "primary")
                 if submitted_login and users_dict and (login_username in users_dict.keys()) and (len(login_username) >= 6) and (len(login_password) >= 6):
                     if (users_dict[login_username]['password'] == login_password):
                         st.session_state['loggedin'] = True
@@ -93,7 +93,7 @@ else:
                 signup_username = st.text_input("Display Name / Username", placeholder="Field Naturalist", max_chars=12)
                 signup_password = st.text_input("Password", type="password", placeholder="••••••••", max_chars=12)
                 
-                submitted_signup = st.form_submit_button("Register & Sync DB")
+                submitted_signup = st.form_submit_button("Register & Sync DB", type = "primary")
                 if submitted_signup and signup_username and len(signup_username) >= 6 and len(signup_password) >= 6:
                     if users_dict and signup_username in users_dict.keys():
                         st.error("Username already exists. Please choose another.")

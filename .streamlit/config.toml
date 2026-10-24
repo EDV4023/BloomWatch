@@ -15,7 +15,7 @@ secondaryBackgroundColor = "#111827"
 textColor = "#f3f4f6"
 
 # Increase default font size globally (default is 16px)
-baseFontSize = 17
+baseFontSize = 16
 
 [runner]
 magicEnabled = false
