@@ -64,6 +64,8 @@ else:
     with col1:
         with st.container(border=True):
             st.subheader("Sign In")
+            st.markdown("<p style='color: #9ca3af; font-size: 0.9rem; margin-bottom: 1.5rem;'>Welcome back! Enter your credentials to access your field notes and dashboard.</p>", unsafe_allow_html=True)
+            
             with st.form("Login_Card_Form"):
                 login_username = st.text_input("Username", placeholder="Enter username", max_chars=12)
                 login_password = st.text_input("Password", type="password", placeholder="••••••••", max_chars=12)
