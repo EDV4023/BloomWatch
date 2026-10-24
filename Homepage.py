@@ -16,16 +16,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Add this near the top of every page script right after st.set_page_config()
-# 1. Render the glowing green BloomWatch header ONCE at the top of the sidebar
-with st.sidebar:
-    st.html("""
-        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); margin-bottom: 1.5rem; padding-left: 0.5rem;">
-            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
-            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
-        </div>
-    """)
-
 # 2. Global Styling & Sidebar Text Enlargement
 st.html("""
 <style>
