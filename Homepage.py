@@ -9,6 +9,8 @@ import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, db
 from pathlib import Path
+from components import apply_global_theme
+
 
 st.set_page_config(
     page_title="BloomWatch - Flora & Fauna Intelligence",
@@ -16,52 +18,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# 2. Global Styling & Sidebar Text Enlargement
-st.html("""
-<style>
-    /* Global App Background & Text */
-    .stApp {
-        background-color: #0b0f19;
-        color: #f3f4f6;
-    }
-    
-    /* Sidebar Styling & Text Enlargement */
-    [data-testid="stSidebar"] {
-        background-color: #111827;
-        border-right: 1px solid #1f2937;
-        padding-top: 1rem;
-    }
-    
-    [data-testid="stSidebar"] span, 
-    [data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] a, 
-    [data-testid="stSidebar"] div {
-        font-size: 1.15rem !important;
-    }
-    
-    [data-testid="stSidebar"] a {
-        padding: 0.6rem 0.8rem !important;
-    }
-    
-    /* Card & Container Polish */
-    div.stMarkdown, div.stButton {
-        color: #f3f4f6;
-    }
-    
-    /* Primary Accent Buttons */
-    .stButton button {
-        background-color: #10b981;
-        color: #ffffff;
-        border: none;
-        border-radius: 0.5rem;
-        font-weight: 600;
-    }
-    .stButton button:hover {
-        background-color: #059669;
-        color: #ffffff;
-    }
-</style>
-""")
+apply_global_theme()
 
 # Ensure that firebase database does not continuously reinitialize, so we store it in a cache
 @st.cache_resource

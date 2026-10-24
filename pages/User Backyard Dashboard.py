@@ -5,60 +5,15 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from firebase_admin import db
 from google import genai
 from google.genai import types
+from components import apply_global_theme
+
 
 client = genai.Client(api_key = st.secrets.API_KEY)
 
 st.set_page_config(page_title="BloomWatch - Backyard Dashboard", layout="wide")
 
-# Prevent user from bypassing authentication
-if "loggedin" not in st.session_state:
-    st.switch_page(r"Homepage.py")
-# 1. Inject the Flexbox reordering CSS and Brand HTML
-st.html("""
-<style>
-    /* Global Sidebar Background & Padding */
-    [data-testid="stSidebar"] {
-        background-color: #111827;
-        border-right: 1px solid #1f2937;
-        padding-top: 1rem;
-    }
-    
-    /* Enlarge sidebar text and navigation links */
-    [data-testid="stSidebar"] span, 
-    [data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] a, 
-    [data-testid="stSidebar"] div {
-        font-size: 1.15rem !important;
-    }
-    
-    [data-testid="stSidebar"] a {
-        padding: 0.6rem 0.8rem !important;
-    }
+apply_global_theme()
 
-    /* Force the sidebar layout to flex so we can reorder items */
-    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    /* Pull our custom brand container to the absolute top (-100) */
-    .sidebar-brand-wrapper {
-        order: -100 !important;
-        margin-bottom: 1.5rem;
-    }
-</style>
-""")
-
-# 2. Render the Brand Header (it will automatically jump to the top due to order: -100)
-with st.sidebar:
-    st.html("""
-        <div class="sidebar-brand-wrapper" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); padding-left: 0.5rem;">
-            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
-            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
-        </div>
-    """)
-
-    
 # Load User Data
 user_ref = db.reference("users").child(st.session_state.username)
 user_data = user_ref.get()
