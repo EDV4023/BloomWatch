@@ -8,7 +8,7 @@ from google.genai import types
 
 client = genai.Client(api_key = st.secrets.API_KEY)
 
-st.title("Backyard Dashboard")
+st.set_page_config(page_title="BloomWatch - Backyard Dashboard", layout="wide")
 
 # Prevent user from bypassing authentication
 if "loggedin" not in st.session_state:
@@ -47,7 +47,7 @@ st.html("""
 </style>
 """)
 
-#Load User Data
+# Load User Data
 user_ref = db.reference("users").child(st.session_state.username)
 user_data = user_ref.get()
 if not user_data:
@@ -89,32 +89,6 @@ total_points = user_data["points"]
 
 combined_species_list = new_plants + new_animals + new_flowers + new_pollinators + new_nn
 
-# # Tested: Working
-# def get_latlng() -> tuple[float, float]:
-#     g = geocoder.ip("me") # Get user's current IP: Need to ask user for permission to access location data
-
-#     # If latitude and longitude attribute exsits then extract location data
-#     if g.latlng:
-#         lat, long = g.latlng
-#         return lat, long
-#     else:
-#         return None
-
-# # Tested: Working
-# def convert_latlng_to_city(lat: float, long: float) -> str | None:
-#     geolocator = Nominatim(user_agent = "backyard_environmental_diversity_checker | edanvaiz@gmail.com")
-
-#     try:
-#         location = geolocator.reverse(f"{lat},{long}")
-
-#         # Obtain postal code/zip code
-#         if location and "address" in location.raw:
-#             address = location.raw["address"]
-#             return address["town"], address["state"]
-#         return None
-#     except (GeocoderTimedOut, GeocoderServiceError):
-#         return None
-
 # Tested: Working
 def user_location() -> tuple[str, str] | None:
     users_ref = db.reference(f"users/{st.session_state.username}")
@@ -123,68 +97,65 @@ def user_location() -> tuple[str, str] | None:
         return users_dict["city"], users_dict["state"]
     else:
         return None
-    
 
 if "history" not in st.session_state:
     st.session_state.history = []
 
+st.title("Backyard Sightings Log & AI Advisor")
+st.markdown("<p style='color: #9ca3af; margin-bottom: 1.5rem;'>Review logged specimens, track ecosystem scores, and get Gemini recommendations to improve your backyard biodiversity.</p>", unsafe_allow_html=True)
+
+# Dashboard Header Card (Location & Points Metrics)
+with st.container(border=True):
+    city, state = user_location()
+    if city and state:
+        st.markdown(f"**Location:** {city}, {state}")
+    st.metric(label="Total Points", value=user_data["points"])
+
 st.divider()
-st.header(f"{st.session_state.username}'s Backyard Dashboard")
 
-#Display user location
-city,state=user_location()
-if city and state:
-    st.subheader(f"Location: {city}, {state}")
+# Display Sightings History inside a Structured Container Card
+with st.container(border=True):
+    st.subheader("Logged Sightings Table")
+    if combined_species_list:
+        for entry in combined_species_list:
+            species_info, species_profile = st.columns(2)
+            with species_info:
+                st.write(f"{entry[0]}: {entry[1]}")
+            with species_profile:
+                st.page_link(page = r"pages/Species Profile.py", label = "Species Profile", query_params = {"species" : entry[0], "type" : entry[1].split("[")[1][:-1]})
 
-#Display total points
-st.metric(label="Total Points", value=user_data["points"])
+        species_count = {}
+        for entry in combined_species_list:
+            species_count[entry[0]] = species_count.get(entry[0], 0) + 1
+        
+        st.divider()
+        st.subheader("Species Breakdown")
+        st.bar_chart(species_count)
+
+        st.divider()
+        st.subheader("Unique Species")
+
+        pl, an, fl, po, no = st.tabs(["Plants", "Animals", "Flowering Plants", "Pollinators", "Non-Native"])
+
+        with pl:
+            for i in set(plants):
+                st.write("*"+i+"*")
+        with an:
+            for i in set(animals):
+                st.write("*"+i+"*")
+        with fl:
+            for i in set(flowers):
+                st.write("*"+i+"*")
+        with po:
+            for i in set(pollinators):
+                st.write("*"+i+"*")
+        with no:
+            for i in set(non_native):
+                st.write("*"+i+"*")
+    else:
+        st.info("No logged sightings yet. Use the Field Scanner to identify specimens.")
 
 st.divider()
-
-#Display Sightings History
-if combined_species_list:
-    st.subheader("Sightings History")
-    for entry in combined_species_list:
-        species_info, species_profile = st.columns(2)
-        with species_info:
-            st.write(f"{entry[0]}: {entry[1]}")
-        with species_profile:
-            st.page_link(page = r"pages/Species Profile.py", label = "Species Profile", query_params = {"species" : entry[0], "type" : entry[1].split("[")[1][:-1]})
-
-    species_count = {}
-    for entry in combined_species_list:
-        species_count[entry[0]] = species_count.get(entry[0], 0) + 1
-    
-    st.divider()
-    
-    st.subheader("Species Breakdown")
-    st.bar_chart(species_count)
-
-    st.divider()
-
-    st.subheader("Unique Species")
-
-    pl, an, fl, po, no = st.tabs(["Plants", "Animals", "Flowering Plants", "Pollinators", "Non-Native"])
-
-    with pl:
-        for i in set(plants):
-            st.write("*"+i+"*")
-    with an:
-        for i in set(animals):
-            st.write("*"+i+"*")
-    with fl:
-        for i in set(flowers):
-            st.write("*"+i+"*")
-    with po:
-        for i in set(pollinators):
-            st.write("*"+i+"*")
-    with no:
-        for i in set(non_native):
-            st.write("*"+i+"*")
-
-    st.divider()
-else:
-    st.info("No sightings yet. Start exploring your backyard!")
 
 color_map = {
     "Plant" : "green",
@@ -194,24 +165,30 @@ color_map = {
     "Non-Native/Invasive Species": "red"
 }
 
-st.subheader("Improvement Guide")
-for i in set(non_native):
-    st.write("- Remove: *:red["+i+"]*")
-try:
-    response = client.models.generate_content(
-    model="gemini-2.0-flash",
-    contents = f"Reccomend 10 more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly for the user's backyard. Reccomend species that can be found in the user's backyard at their location, so nothing outlandish. Current user's backyard {combined_species_list}. Only list out specific species with their COMMON NAME (No Scientific Name) in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \n - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator")
+# AI Improvement Guide Section inside Card Container
+with st.container(border=True):
+    st.subheader("Gemini Backyard Biodiversity Advisor")
+    st.markdown("<p style='color: #9ca3af;'>Generate a custom enhancement plan for your backyard based on your region and logged species.</p>", unsafe_allow_html=True)
+    
+    for i in set(non_native):
+        st.write("- Remove: *:red["+i+"]*")
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents = f"Reccomend 10 more native (In Location {city}, {state}) plants, animals, and flowering plants to increase the user's biodiversity, and make it more pollinator friendly for the user's backyard. Reccomend species that can be found in the user's backyard at their location, so nothing outlandish. Current user's backyard {combined_species_list}. Only list out specific species with their COMMON NAME (No Scientific Name) in dash format. Do not include any greetings, formalities, any starting text, any other text that isn't the dash format stated, or text like \"Here are some reccomendations\", just list new species in format: - SPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \nSPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator \nSPECIES_NAME||Plant, Animal, Flowering Plant or Pollinator"
+        )
 
-    st.write("**Possible New Additions to Look Out for:**")
-    for i in response.text.split("\n"):
-        species = i.split("||")[0].replace("-","")
-        species_type = i.split("||")[1]
+        st.write("**Possible New Additions to Look Out for:**")
+        for i in response.text.split("\n"):
+            if "||" in i:
+                species = i.split("||")[0].replace("-","").strip()
+                species_type = i.split("||")[1].strip()
 
-        recc_info, recc_profile = st.columns(2)
-        with recc_info:
-            st.write(f"- {species}: :{color_map[species_type]}-badge[{species_type}]")
-        with recc_profile:
-            st.page_link(page = r"pages/Species Profile.py", label = "Species Profile", query_params = {"species" : species, "type" : species_type})
+                recc_info, recc_profile = st.columns(2)
+                with recc_info:
+                    st.write(f"- {species}: :{color_map.get(species_type, 'green')}-badge[{species_type}]")
+                with recc_profile:
+                    st.page_link(page = r"pages/Species Profile.py", label = "Species Profile", query_params = {"species" : species, "type" : species_type})
 
-except:
-    st.space()
+    except Exception:
+        pass
