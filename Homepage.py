@@ -18,9 +18,19 @@ st.set_page_config(
 
 # Add this near the top of every page script right after st.set_page_config()
 
+
+# 1. Render the glowing green BloomWatch header at the top of the sidebar
+with st.sidebar:
+    st.html("""
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); margin-bottom: 1.5rem; padding-left: 0.5rem;">
+            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
+            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
+        </div>
+    """)
+
+# 2. Apply sidebar styling and text enlargement rules
 st.html("""
 <style>
-    /* Sidebar Styling & Text Enlargement */
     [data-testid="stSidebar"] {
         background-color: #111827;
         border-right: 1px solid #1f2937;
@@ -37,30 +47,8 @@ st.html("""
     [data-testid="stSidebar"] a {
         padding: 0.6rem 0.8rem !important;
     }
-
-    /* Custom Sidebar Header Styling */
-    .sidebar-brand {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #10b981;
-        text-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
-        margin-bottom: 1.5rem;
-        padding-left: 0.5rem;
-    }
 </style>
 """)
-
-# Render Glowing Green Brand Header in Sidebar
-with st.sidebar:
-    st.html("""
-        <div class="sidebar-brand">
-            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
-            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
-        </div>
-    """)
 
 # Global Dark Theme Styling & Card Containers
 st.html("""

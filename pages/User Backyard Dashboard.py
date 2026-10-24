@@ -14,6 +14,15 @@ st.set_page_config(page_title="BloomWatch - Backyard Dashboard", layout="wide")
 if "loggedin" not in st.session_state:
     st.switch_page(r"Homepage.py")
 
+# Render Glowing Green Brand Header at the VERY TOP of the Sidebar
+with st.sidebar:
+    st.html("""
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); margin-bottom: 1.5rem; padding-left: 0.5rem;">
+            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
+            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
+        </div>
+    """)
+
 st.html("""
 <style>
     /* Global App Background & Text */
@@ -58,30 +67,8 @@ st.html("""
         background-color: #059669;
         color: #ffffff;
     }
-
-    /* Custom Sidebar Header Styling */
-    .sidebar-brand {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #10b981;
-        text-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
-        margin-bottom: 1.5rem;
-        padding-left: 0.5rem;
-    }
 </style>
 """)
-
-# Render Glowing Green Brand Header in Sidebar
-with st.sidebar:
-    st.html("""
-        <div class="sidebar-brand">
-            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
-            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
-        </div>
-    """)
 
 # Load User Data
 user_ref = db.reference("users").child(st.session_state.username)
@@ -96,22 +83,22 @@ def clean_list(lst):
         return []
     return [item for item in lst if item != "PLACEHOLDER"]
 
-plants = clean_list(user_data["plants"])
+plants = clean_list(user_data.get("plants", []))
 new_plants = [(p, ":green-badge[Plant]") for p in plants]
 
-animals = clean_list(user_data["animals"])
+animals = clean_list(user_data.get("animals", []))
 new_animals = [(a, ":blue-badge[Animal]") for a in animals]
 
-flowers = clean_list(user_data["flowers"])
+flowers = clean_list(user_data.get("flowers", []))
 new_flowers = [(f, ":violet-badge[Flowering Plant]") for f in flowers]
 
-pollinators = clean_list(user_data["pollinators"])
+pollinators = clean_list(user_data.get("pollinators", []))
 new_pollinators = [(pl, ":yellow-badge[Pollinator]") for pl in pollinators]
 
-non_native = clean_list(user_data["non_native"])
+non_native = clean_list(user_data.get("non_native", []))
 new_nn = [(n, ":red-badge[Non-Native/Invasive Species]") for n in non_native]
 
-total_points = user_data["points"]
+total_points = user_data.get("points", 0)
 
 combined_species_list = new_plants + new_animals + new_flowers + new_pollinators + new_nn
 
@@ -119,7 +106,7 @@ def user_location() -> tuple[str, str] | None:
     users_ref = db.reference(f"users/{st.session_state.username}")
     users_dict = users_ref.get()
     if users_dict:
-        return users_dict["city"], users_dict["state"]
+        return users_dict.get("city"), users_dict.get("state")
     else:
         return None
 
@@ -137,7 +124,7 @@ with st.container(border=True):
     city, state = user_location()
     if city and state:
         st.markdown(f"**Location:** {city}, {state}")
-    st.metric(label="Total Points", value=user_data["points"])
+    st.metric(label="Total Points", value=user_data.get("points", 0))
 
 st.divider()
 

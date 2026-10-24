@@ -15,52 +15,6 @@ st.set_page_config(
 if "loggedin" not in st.session_state:
     st.switch_page("Homepage.py")
 
-# Add this near the top of every page script right after st.set_page_config()
-
-st.html("""
-<style>
-    /* Sidebar Styling & Text Enlargement */
-    [data-testid="stSidebar"] {
-        background-color: #111827;
-        border-right: 1px solid #1f2937;
-        padding-top: 1rem;
-    }
-    
-    [data-testid="stSidebar"] span, 
-    [data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] a, 
-    [data-testid="stSidebar"] div {
-        font-size: 1.15rem !important;
-    }
-    
-    [data-testid="stSidebar"] a {
-        padding: 0.6rem 0.8rem !important;
-    }
-
-    /* Custom Sidebar Header Styling */
-    .sidebar-brand {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #10b981;
-        text-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
-        margin-bottom: 1.5rem;
-        padding-left: 0.5rem;
-    }
-</style>
-""")
-
-# Render Glowing Green Brand Header in Sidebar
-with st.sidebar:
-    st.html("""
-        <div class="sidebar-brand">
-            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
-            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
-        </div>
-    """)
-
 # Global Dark Theme Styling
 st.html("""
 <style>
@@ -96,6 +50,37 @@ st.html("""
 </style>
 """)
 
+# 1. Render the glowing green BloomWatch header at the top of the sidebar
+with st.sidebar:
+    st.html("""
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); margin-bottom: 1.5rem; padding-left: 0.5rem;">
+            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
+            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
+        </div>
+    """)
+
+# 2. Apply sidebar styling and text enlargement rules
+st.html("""
+<style>
+    [data-testid="stSidebar"] {
+        background-color: #111827;
+        border-right: 1px solid #1f2937;
+        padding-top: 1rem;
+    }
+    
+    [data-testid="stSidebar"] span, 
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] a, 
+    [data-testid="stSidebar"] div {
+        font-size: 1.15rem !important;
+    }
+    
+    [data-testid="stSidebar"] a {
+        padding: 0.6rem 0.8rem !important;
+    }
+</style>
+""")
+
 st.title(":green[Wildlife] Scan")
 st.markdown("<p style='color: #9ca3af; margin-bottom: 1.5rem;'>Capture or upload a picture for instant taxonomic identification and score evaluation.</p>", unsafe_allow_html=True)
 
@@ -108,9 +93,9 @@ except Exception as e:
 
 uploaded_image = None
 
-# Input Method Selection using clean modern tabs inside a styled container
+# Input Method Selection using clean modern tabs with Material Icons
 with st.container(border=True):
-    tab_upload, tab_camera = st.tabs(["📁 Upload Image", "📷 Capture from Camera"])
+    tab_upload, tab_camera = st.tabs([":material/upload: Upload Image", ":material/photo_camera: Capture from Camera"])
     
     with tab_upload:
         uploaded_file = st.file_uploader("Upload a plant, flower, or animal image", type=["jpg", "jpeg", "png"])
