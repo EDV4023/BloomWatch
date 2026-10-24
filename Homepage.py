@@ -17,9 +17,7 @@ st.set_page_config(
 )
 
 # Add this near the top of every page script right after st.set_page_config()
-
-
-# 1. Render the glowing green BloomWatch header at the top of the sidebar
+# 1. Render the glowing green BloomWatch header ONCE at the top of the sidebar
 with st.sidebar:
     st.html("""
         <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); margin-bottom: 1.5rem; padding-left: 0.5rem;">
@@ -28,9 +26,16 @@ with st.sidebar:
         </div>
     """)
 
-# 2. Apply sidebar styling and text enlargement rules
+# 2. Global Styling & Sidebar Text Enlargement
 st.html("""
 <style>
+    /* Global App Background & Text */
+    .stApp {
+        background-color: #0b0f19;
+        color: #f3f4f6;
+    }
+    
+    /* Sidebar Styling & Text Enlargement */
     [data-testid="stSidebar"] {
         background-color: #111827;
         border-right: 1px solid #1f2937;
@@ -47,23 +52,6 @@ st.html("""
     [data-testid="stSidebar"] a {
         padding: 0.6rem 0.8rem !important;
     }
-</style>
-""")
-
-# Global Dark Theme Styling & Card Containers
-st.html("""
-<style>
-    /* Global App Background & Text */
-    .stApp {
-        background-color: #0b0f19;
-        color: #f3f4f6;
-    }
-    
-    /* Sidebar Styling */
-    [data-testid="stSidebar"] {
-        background-color: #111827;
-        border-right: 1px solid #1f2937;
-    }
     
     /* Card & Container Polish */
     div.stMarkdown, div.stButton {
@@ -76,7 +64,6 @@ st.html("""
         color: #ffffff;
         border: none;
         border-radius: 0.5rem;
-        width: 100%;
         font-weight: 600;
     }
     .stButton button:hover {

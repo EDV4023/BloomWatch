@@ -14,8 +14,17 @@ st.set_page_config(
 # Prevent user from bypassing authentication
 if "loggedin" not in st.session_state:
     st.switch_page("Homepage.py")
+    
+# 1. Render the glowing green BloomWatch header ONCE at the top of the sidebar
+with st.sidebar:
+    st.html("""
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); margin-bottom: 1.5rem; padding-left: 0.5rem;">
+            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
+            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
+        </div>
+    """)
 
-# Global Dark Theme Styling
+# 2. Global Styling & Sidebar Text Enlargement
 st.html("""
 <style>
     /* Global App Background & Text */
@@ -24,10 +33,22 @@ st.html("""
         color: #f3f4f6;
     }
     
-    /* Sidebar Styling */
+    /* Sidebar Styling & Text Enlargement */
     [data-testid="stSidebar"] {
         background-color: #111827;
         border-right: 1px solid #1f2937;
+        padding-top: 1rem;
+    }
+    
+    [data-testid="stSidebar"] span, 
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] a, 
+    [data-testid="stSidebar"] div {
+        font-size: 1.15rem !important;
+    }
+    
+    [data-testid="stSidebar"] a {
+        padding: 0.6rem 0.8rem !important;
     }
     
     /* Card & Container Polish */
@@ -46,37 +67,6 @@ st.html("""
     .stButton button:hover {
         background-color: #059669;
         color: #ffffff;
-    }
-</style>
-""")
-
-# 1. Render the glowing green BloomWatch header at the top of the sidebar
-with st.sidebar:
-    st.html("""
-        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); margin-bottom: 1.5rem; padding-left: 0.5rem;">
-            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
-            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
-        </div>
-    """)
-
-# 2. Apply sidebar styling and text enlargement rules
-st.html("""
-<style>
-    [data-testid="stSidebar"] {
-        background-color: #111827;
-        border-right: 1px solid #1f2937;
-        padding-top: 1rem;
-    }
-    
-    [data-testid="stSidebar"] span, 
-    [data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] a, 
-    [data-testid="stSidebar"] div {
-        font-size: 1.15rem !important;
-    }
-    
-    [data-testid="stSidebar"] a {
-        padding: 0.6rem 0.8rem !important;
     }
 </style>
 """)
