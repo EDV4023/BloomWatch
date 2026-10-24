@@ -167,7 +167,7 @@ color_map = {
 
 # AI Improvement Guide Section inside Card Container
 with st.container(border=True):
-    st.subheader("Gemini Backyard Biodiversity Advisor")
+    st.subheader("Backyard Biodiversity Advisor")
     st.markdown("<p style='color: #9ca3af;'>Generate a custom enhancement plan for your backyard based on your region and logged species.</p>", unsafe_allow_html=True)
     
     for i in set(non_native):

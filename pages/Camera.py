@@ -50,8 +50,8 @@ st.html("""
 </style>
 """)
 
-st.title("AI Field Scanner")
-st.markdown("<p style='color: #9ca3af; margin-bottom: 1.5rem;'>Capture or upload a picture for instant taxonomic identification.</p>", unsafe_allow_html=True)
+st.title(":green[Wildlife] Scan")
+st.markdown("<p style='color: #9ca3af; margin-bottom: 1.5rem;'>Capture or upload a picture for instant taxonomic identification and score evaluation.</p>", unsafe_allow_html=True)
 
 # Initialize Gemini client using app secrets
 try:
@@ -60,17 +60,18 @@ except Exception as e:
     st.error("Gemini API key not found in secrets. Please configure st.secrets.API_KEY.")
     st.stop()
 
-# Input Method Selection tabs/radio
-input_method = st.radio("Choose Input Method", ["Upload Image", "Capture from Camera"], horizontal=True)
-
 uploaded_image = None
 
+# Input Method Selection using clean modern tabs inside a styled container
 with st.container(border=True):
-    if input_method == "Upload Image":
+    tab_upload, tab_camera = st.tabs(["📁 Upload Image", "📷 Capture from Camera"])
+    
+    with tab_upload:
         uploaded_file = st.file_uploader("Upload a plant, flower, or animal image", type=["jpg", "jpeg", "png"])
         if uploaded_file is not None:
             uploaded_image = Image.open(uploaded_file)
-    else:
+            
+    with tab_camera:
         camera_file = st.camera_input("Take a photo of wildlife")
         if camera_file is not None:
             uploaded_image = Image.open(camera_file)
@@ -88,9 +89,20 @@ if uploaded_image is not None:
                 img_bytes = img_byte_arr.getvalue()
 
                 prompt_text = (
-                    "Analyze this image. Identify the plant, flower, or bird accurately. "
+                    "Analyze this image. "
+                    "1. Identify the species in the image accurately (Common name, latinName, family, description). "
+                    "2. Determine if the species is indigenous to the ecosystem or invasive/non-native. "
+                    "If it is an invasive species (e.g., Chinese Tallow, Emerald Ash Borer, Kudzu) introduced from another region that actively harms the local environment, "
+                    "it MUST be classified as invasive with a score of -1. "
+                    "3. Apply the exact hierarchy for points and category evaluation: "
+                    "- Invasive = -1 (category: 'invasive') "
+                    "- Neither plant nor animal = 0 (category: 'other') "
+                    "- Regular plant/vegetation (non-flowering) = 2 (category: 'plants') "
+                    "- Wild animal (non-pollinator) = 5 (category: 'animals') "
+                    "- Flowering plant = 10 (category: 'flowering') "
+                    "- Pollinator = 20 (category: 'pollinators') "
                     "Return a strict JSON object with exact keys: "
-                    "name (common name), latinName, family, description, isBird (boolean), "
+                    "name, latinName, family, description, isBird (boolean), category, points (integer), "
                     "wikipediaQuery (exact title string for Wikipedia article lookup). "
                     "No markdown formatting outside the JSON."
                 )
@@ -117,7 +129,7 @@ if 'last_identified' in st.session_state and st.session_state['last_identified']
     
     with st.container(border=True):
         st.subheader(item.get('name'))
-        st.markdown(f"*{item.get('latinName')}* &bull; **Family:** {item.get('family')}")
+        st.markdown(f"*{item.get('latinName')}* &bull; **Family:** {item.get('family')} &bull; **Earns:** `{item.get('points', 0)} Points`")
         st.markdown(f"<p style='color: #9ca3af; margin-top: 0.5rem;'>{item.get('description')}</p>", unsafe_allow_html=True)
 
         if st.button("Save to Account Log"):
@@ -125,10 +137,9 @@ if 'last_identified' in st.session_state and st.session_state['last_identified']
                 username = st.session_state.get("username")
                 if username:
                     user_ref = db.reference(f"users/{username}")
-                    user_data = user_ref.get()
+                    user_data = user_ref.get() or {}
                     
-                    # Determine category bucket based on taxonomy type
-                    category = "animals" if item.get("isBird") else "plants"
+                    category = item.get("category", "plants")
                     current_list = user_data.get(category, [])
                     
                     if "PLACEHOLDER" in current_list:
@@ -136,13 +147,14 @@ if 'last_identified' in st.session_state and st.session_state['last_identified']
                     elif item.get('name') not in current_list:
                         current_list.append(item.get('name'))
                     
-                    new_points = int(user_data.get("points", 0)) + 1
+                    earned_points = int(item.get("points", 0))
+                    new_points = int(user_data.get("points", 0)) + earned_points
 
                     user_ref.update({
                         category: current_list,
                         "points": new_points
                     })
                     st.session_state.points = new_points
-                    st.success("Specimen successfully saved to your account log and synchronized with Firebase!")
+                    st.success(f"Specimen saved! Added {earned_points} points to your account.")
             except Exception as e:
                 st.error(f"Failed to save to database: {e}")
