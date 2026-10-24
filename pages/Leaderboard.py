@@ -9,31 +9,17 @@ st.title("Points Leaderboard")
 st.markdown("<p style='color: #9ca3af; margin-bottom: 1.5rem;'>Top conservation observers ranked by net biodiversity score and contribution points.</p>", unsafe_allow_html=True)
 
 # Add this near the top of every page script right after st.set_page_config()
-# 1. Render the glowing green BloomWatch header ONCE at the top of the sidebar
-with st.sidebar:
-    st.html("""
-        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); margin-bottom: 1.5rem; padding-left: 0.5rem;">
-            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
-            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
-        </div>
-    """)
-
-# 2. Global Styling & Sidebar Text Enlargement
+# 1. Inject the Flexbox reordering CSS and Brand HTML
 st.html("""
 <style>
-    /* Global App Background & Text */
-    .stApp {
-        background-color: #0b0f19;
-        color: #f3f4f6;
-    }
-    
-    /* Sidebar Styling & Text Enlargement */
+    /* Global Sidebar Background & Padding */
     [data-testid="stSidebar"] {
         background-color: #111827;
         border-right: 1px solid #1f2937;
         padding-top: 1rem;
     }
     
+    /* Enlarge sidebar text and navigation links */
     [data-testid="stSidebar"] span, 
     [data-testid="stSidebar"] p, 
     [data-testid="stSidebar"] a, 
@@ -44,26 +30,29 @@ st.html("""
     [data-testid="stSidebar"] a {
         padding: 0.6rem 0.8rem !important;
     }
-    
-    /* Card & Container Polish */
-    div.stMarkdown, div.stButton {
-        color: #f3f4f6;
+
+    /* Force the sidebar layout to flex so we can reorder items */
+    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+        display: flex;
+        flex-direction: column;
     }
     
-    /* Primary Accent Buttons */
-    .stButton button {
-        background-color: #10b981;
-        color: #ffffff;
-        border: none;
-        border-radius: 0.5rem;
-        font-weight: 600;
-    }
-    .stButton button:hover {
-        background-color: #059669;
-        color: #ffffff;
+    /* Pull our custom brand container to the absolute top (-100) */
+    .sidebar-brand-wrapper {
+        order: -100 !important;
+        margin-bottom: 1.5rem;
     }
 </style>
 """)
+
+# 2. Render the Brand Header (it will automatically jump to the top due to order: -100)
+with st.sidebar:
+    st.html("""
+        <div class="sidebar-brand-wrapper" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); padding-left: 0.5rem;">
+            <span style="font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));">🌿</span>
+            <span style="color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);">BloomWatch</span>
+        </div>
+    """)
 
 # --- BACKEND LOGIC (Unchanged) ---
 ref = db.reference("users").get()
