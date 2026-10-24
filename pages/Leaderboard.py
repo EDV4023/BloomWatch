@@ -60,21 +60,29 @@ else:
 # --- FRONTEND UI RENDERING ---
 try:
     if l:
-        # Build structured data for the dark minimalistic table view
         df_data = []
         for i in range(1, min(11, len(l) + 1)):
+            # Assigning text-based rank formatting for top 3 (No emojis)
+            if i == 1:
+                rank_display = "1 (Gold)"
+            elif i == 2:
+                rank_display = "2 (Silver)"
+            elif i == 3:
+                rank_display = "3 (Bronze)"
+            else:
+                rank_display = str(i)
+
             df_data.append({
-                "Rank": i,
+                "Rank": rank_display,
                 "Observer": l[i-1][0],
                 "Total Points": l[i-1][1]
             })
         
         df = pd.DataFrame(df_data)
         
-        # Render inside a sleek card container matching the dark theme
-        st.markdown('<div style="background-color: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 1.5rem;">', unsafe_allow_html=True)
-        st.dataframe(df, use_container_width=True, hide_index=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Fixed container logic using Streamlit's native bordered container
+        with st.container(border=True):
+            st.dataframe(df, use_container_width=True, hide_index=True)
     else:
         st.write("No leaderboard data available.")
 except Exception:
