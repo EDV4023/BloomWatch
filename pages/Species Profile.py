@@ -70,7 +70,7 @@ if wiki_res.status_code == 200:
 st.title(species_name)
 st.badge(label=species_type, color=color_map.get(species_type, "green"))
 
-# Render normal, well-sized Streamlit image instead of a giant carousel
+# Render image with normal width
 if image_url:
     st.image(image_url, caption=species_name, width=400)
 else:
@@ -79,17 +79,27 @@ else:
 # Render Audio Call / Chirp if Bird or Animal
 if species_type == "Bird" or "Bird" in str(species_type) or species_type == "Animal":
     st.subheader("Bird Audio Call / Chirp")
+    audio_found = False
     try:
-        xc_res = requests.get(f"https://www.xeno-canto.org/api/2/recordings?query={species_name.replace(' ', '_')}")
-        xc_data = xc_res.json()
-        if xc_data.get("recordings") and len(xc_data["recordings"]) > 0:
-            rec = xc_data["recordings"][0]
-            st.audio("https:" + rec["file"])
-            st.caption(f"Audio recorded by {rec.get('rec', 'Unknown')} in {rec.get('loc', 'Unknown')} via Xeno-Canto")
-        else:
-            st.info("No audio recordings found for this species.")
-    except Exception:
-        st.info("Audio lookup currently unavailable.")
+        # Use '+' or spaces for Xeno-Canto query instead of underscores
+        query_str = species_name.replace(' ', '+')
+        xc_res = requests.get(f"https://www.xeno-canto.org/api/2/recordings?query={query_str}")
+        if xc_res.status_code == 200:
+            xc_data = xc_res.json()
+            if xc_data.get("recordings") and len(xc_data["recordings"]) > 0:
+                rec = xc_data["recordings"][0]
+                audio_file = rec.get("file", "")
+                if audio_file:
+                    if audio_file.startswith("//"):
+                        audio_file = "https:" + audio_file
+                    st.audio(audio_file)
+                    st.caption(f"Audio recorded by {rec.get('rec', 'Unknown')} in {rec.get('loc', 'Unknown')} via Xeno-Canto")
+                    audio_found = True
+        
+        if not audio_found:
+            st.info(f"No audio recordings found for '{species_name}' on Xeno-Canto.")
+    except Exception as e:
+        st.error(f"Audio lookup error: {e}")
 
 # Display Description
 st.write(overview)
