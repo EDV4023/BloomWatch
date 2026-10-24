@@ -8,6 +8,7 @@ import cv2
 import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, db
+from pathlib import Path
 
 st.set_page_config(
     page_title="BloomWatch - Flora & Fauna Intelligence",
@@ -65,30 +66,31 @@ st.session_state.init_run = False
 users_ref = db.reference('users')
 users_dict = users_ref.get()
 
-# Register navigation pages:
-# - Visible pages appear in the sidebar navbar with custom icons.
-# - Hidden pages are registered so st.switch_page() / st.page_link() recognize them safely.
-pg = st.navigation({
-    "Main": [
-        st.Page("pages/Camera.py", title="Identify & Capture", icon=":material/camera:"),
-        st.Page("pages/Leaderboard.py", title="Leaderboard", icon=":material/trophy:"),
-        st.Page("pages/User Backyard Dashboard.py", title="Backyard Dashboard", icon=":material/dashboard:")
-    ],
-    "Hidden": [
-        st.Page("pages/Sign Up.py", title="Sign Up", visibility="hidden"),
-        st.Page("pages/Species Profile.py", title="Species Profile", visibility="hidden")
-    ]
-})
+# Safely register active pages using pathlib to avoid file-not-found errors
+pages_dir = Path(__file__).parent / "pages"
+
+nav_pages = [
+    st.Page(str(pages_dir / "Camera.py"), title="Identify & Capture", icon=":material/camera:"),
+    st.Page(str(pages_dir / "Leaderboard.py"), title="Leaderboard", icon=":material/trophy:"),
+    st.Page(str(pages_dir / "User Backyard Dashboard.py"), title="Backyard Dashboard", icon=":material/dashboard:")
+]
+
+# Optional hidden page registration if the file exists
+species_profile_path = pages_dir / "Species Profile.py"
+if species_profile_path.exists():
+    nav_pages.append(st.Page(str(species_profile_path), title="Species Profile", visibility="hidden"))
+
+pg = st.navigation(nav_pages)
 
 # If the user is logged in, run the navigation router
 if st.session_state.get('loggedin', False):
     pg.run()
 else:
-    # Render Dual-Card Account Management Screen on Homepage
+    # Render Dual-Card Account Management Screen on Homepage matching the dark-green theme
     st.title("Account Management")
     st.markdown("<p style='color: #9ca3af; margin-bottom: 2rem;'>Sign in or create an account to securely save and sync your personal field notes.</p>", unsafe_allow_html=True)
 
-    # Side-by-side columns matching the dark UI reference image
+    # Side-by-side columns matching your target UI layout
     col1, col2 = st.columns(2)
 
     with col1:
@@ -112,13 +114,44 @@ else:
                         st.session_state.non_native = list(users_dict[login_username]["non_native"])
                         st.session_state.history = []
 
-                        st.switch_page("pages/Camera.py")
+                        st.switch_page(str(pages_dir / "Camera.py"))
 
     with col2:
         with st.container(border=True):
             st.subheader("Create Account")
-            # If you have a separate signup page logic, you can point them to switch_page or embed the signup form here.
-            st.markdown("<p style='color: #9ca3af; font-size: 0.9rem;'>New field naturalist? Register your profile to start logging observations.</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #9ca3af; font-size: 0.9rem; margin-bottom: 1.5rem;'>New field naturalist? Register your profile to start logging observations.</p>", unsafe_allow_html=True)
             
-            if st.button("Go to Registration"):
-                st.switch_page("pages/Sign Up.py")
+            with st.form("Signup_Card_Form"):
+                signup_username = st.text_input("Display Name / Username", placeholder="Field Naturalist", max_chars=12)
+                signup_password = st.text_input("Password", type="password", placeholder="••••••••", max_chars=12)
+                
+                submitted_signup = st.form_submit_button("Register & Sync DB")
+                if submitted_signup and signup_username and len(signup_username) >= 6 and len(signup_password) >= 6:
+                    if users_dict and signup_username in users_dict.keys():
+                        st.error("Username already exists. Please choose another.")
+                    else:
+                        # Register user in Firebase database
+                        db.reference(f'users/{signup_username}').set({
+                            "password": signup_password,
+                            "points": 0,
+                            "plants": ["PLACEHOLDER"],
+                            "animals": ["PLACEHOLDER"],
+                            "flowers": ["PLACEHOLDER"],
+                            "pollinators": ["PLACEHOLDER"],
+                            "non_native": ["PLACEHOLDER"],
+                            "city": "The Dalles",
+                            "state": "Oregon"
+                        })
+                        st.session_state['loggedin'] = True
+                        st.session_state.username = signup_username
+                        st.session_state.password = signup_password
+                        st.session_state.points = 0
+                        st.session_state.plants = []
+                        st.session_state.animals = []
+                        st.session_state.flowers = []
+                        st.session_state.pollinator = []
+                        st.session_state.non_native = []
+                        st.session_state.history = []
+
+                        st.success("Account created successfully!")
+                        st.switch_page(str(pages_dir / "Camera.py"))
