@@ -49,6 +49,22 @@ st.html("""
 </style>
 """)
 
+
+st.set_page_config(page_title="BloomWatch - AI Scanner", layout="wide")
+
+st.html("""
+<style>
+    .stApp { background-color: #0b0f19; color: #f3f4f6; }
+    [data-testid="stSidebar"] { background-color: #111827; border-right: 1px solid #1f2937; }
+    .card { background-color: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 1.5rem; }
+</style>
+""")
+
+st.title("AI Field Scanner")
+st.markdown("<p style='color: #9ca3af;'>Capture or upload a picture for instant taxonomic identification.</p>", unsafe_allow_html=True)
+
+# --- YOUR ORIGINAL BACKEND LOGIC & CAMERA / GEMINI CODE REMAINS UNCHANGED BELOW ---
+
 #Tested: Working
 def resize(image):
     max_side = 1200
@@ -225,7 +241,7 @@ def identify(img):
         "species":species,
         "points":points
     })
-st.title(":green[Wildlife] Scan")
+# st.title(":green[Wildlife] Scan")
 
 img = st.camera_input("Take an image of wildlife in you backyard")  # # Use when deployed
 # img = st.file_uploader("Test Image")
