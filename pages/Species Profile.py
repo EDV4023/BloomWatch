@@ -47,9 +47,9 @@ st.html("""
 
 species_name = st.query_params.species
 species_type = st.query_params.type
-
-# Fetch Data from Wikipedia API
 headers = {"User-Agent": "BloomWatch/1.0 (Conservation App)"}
+
+# 1. Fetch Data from Wikipedia API
 wiki_search_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{species_name.replace(' ', '_')}"
 wiki_res = requests.get(wiki_search_url, headers=headers)
 wiki_page_url = f"https://en.wikipedia.org/wiki/{species_name.replace(' ', '_')}"
@@ -70,36 +70,48 @@ if wiki_res.status_code == 200:
 st.title(species_name)
 st.badge(label=species_type, color=color_map.get(species_type, "green"))
 
-# Render image with normal width
+# Render normal, well-sized Streamlit image (no carousel)
 if image_url:
     st.image(image_url, caption=species_name, width=400)
 else:
     st.image("https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg", caption="No image available", width=300)
 
-# Render Audio Call / Chirp if Bird or Animal
+# 2. Fetch Bird Call / Audio from Wikimedia Commons API
 if species_type == "Bird" or "Bird" in str(species_type) or species_type == "Animal":
-    st.subheader("Bird Audio Call / Chirp")
-    audio_found = False
+    st.subheader("Bird Audio Call / Song")
+    audio_url = None
     try:
-        # Use '+' or spaces for Xeno-Canto query instead of underscores
-        query_str = species_name.replace(' ', '+')
-        xc_res = requests.get(f"https://www.xeno-canto.org/api/2/recordings?query={query_str}")
-        if xc_res.status_code == 200:
-            xc_data = xc_res.json()
-            if xc_data.get("recordings") and len(xc_data["recordings"]) > 0:
-                rec = xc_data["recordings"][0]
-                audio_file = rec.get("file", "")
-                if audio_file:
-                    if audio_file.startswith("//"):
-                        audio_file = "https:" + audio_file
-                    st.audio(audio_file)
-                    st.caption(f"Audio recorded by {rec.get('rec', 'Unknown')} in {rec.get('loc', 'Unknown')} via Xeno-Canto")
-                    audio_found = True
+        commons_api = "https://commons.wikimedia.org/w/api.php"
+        params = {
+            "action": "query",
+            "generator": "search",
+            "gsrsearch": f"{species_name} call OR song OR sound",
+            "gsrnamespace": "6",  # Namespace 6 targets Media/Files on Wikimedia Commons
+            "gsrlimit": "3",
+            "prop": "imageinfo",
+            "iiprop": "url",
+            "format": "json"
+        }
+        res = requests.get(commons_api, params=params, headers=headers)
+        if res.status_code == 200:
+            data = res.json()
+            pages = data.get("query", {}).get("pages", {})
+            for page_id, page_info in pages.items():
+                imageinfo = page_info.get("imageinfo", [])
+                if imageinfo:
+                    file_url = imageinfo[0].get("url", "")
+                    # Accept common audio formats hosted on Commons (.ogg, .oga, .mp3, .wav)
+                    if file_url.lower().endswith((".ogg", ".oga", ".mp3", ".wav")):
+                        audio_url = file_url
+                        break
         
-        if not audio_found:
-            st.info(f"No audio recordings found for '{species_name}' on Xeno-Canto.")
+        if audio_url:
+            st.audio(audio_url)
+            st.caption("Audio sourced from Wikimedia Commons archive")
+        else:
+            st.info(f"No audio recordings found for '{species_name}'.")
     except Exception as e:
-        st.error(f"Audio lookup error: {e}")
+        st.info("Audio lookup currently unavailable.")
 
 # Display Description
 st.write(overview)
