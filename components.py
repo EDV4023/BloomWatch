@@ -2,7 +2,7 @@ import streamlit as st
 
 def apply_global_theme():
     # 1. Native Streamlit Logo (replace with your actual image path or URL)
-    st.logo("logo.png")
+    st.logo("logo.png", size = "large")
 
     # 2. Global Dark Theme, Container Fills, and Button Styling CSS
     st.html("""
