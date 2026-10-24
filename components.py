@@ -2,13 +2,9 @@ import streamlit as st
 
 def apply_global_theme():
     # 1. Native Streamlit Logo (replace with your actual image path or URL)
-    st.logo("logo.png")
+    st.logo("path_to_logo.png")
 
-    # 2. Native Sidebar Title
-    with st.sidebar:
-        st.title("BloomWatch")
-
-    # 3. Global Dark Theme, Container Fills, Buttons, and Green Sidebar Title Styling
+    # 2. Global Dark Theme, Container Fills, and Button Styling CSS
     st.html("""
     <style>
         /* Global App Background & Text */
@@ -22,13 +18,6 @@ def apply_global_theme():
             background-color: #111827;
             border-right: 1px solid #1f2937;
             padding-top: 1rem;
-        }
-        
-        /* Make the native sidebar title glowing green */
-        [data-testid="stSidebar"] h1 {
-            color: #10b981 !important;
-            text-shadow: 0 0 12px rgba(16, 185, 129, 0.6) !important;
-            font-size: 1.6rem !important;
         }
         
         [data-testid="stSidebar"] span, 
