@@ -51,136 +51,115 @@ headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 species_name = st.query_params.species
 species_type = st.query_params.type
 
-# Request All About Birds page
+# Try scraping All About Birds first
 allaboutbirds_url = f"https://www.allaboutbirds.org/guide/{species_name.replace(' ', '_').title()}/"
-allaboutbirds_search_response = requests.get(allaboutbirds_url, headers=headers)
-bird_soup = BeautifulSoup(allaboutbirds_search_response.text, "html.parser")
+image_list = []
+overview = ""
+scientific_name = ""
+audio_link = ""
 
-find_hero_wrap = bird_soup.find_all("section", attrs={"class": "hero-wrap"})
+try:
+    response = requests.get(allaboutbirds_url, headers=headers, timeout=5)
+    if response.status_code == 200:
+        bird_soup = BeautifulSoup(response.text, "html.parser")
+        
+        # 1. Hero Image
+        hero_section = bird_soup.find("section", class_="hero-wrap")
+        if hero_section and "url(" in hero_section.get("style", ""):
+            img_url = hero_section.get("style").split('url("')[1].split('"')[0]
+            image_list.append(dict(title="Species", text=species_name, img=img_url))
 
-if not find_hero_wrap:
-    # Fallback to Wikipedia if All About Birds page is not found
-    if "Invasive" in species_type:
-        search_url = f"https://en.wikipedia.org/w/index.php?search={species_name}&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1"
-    else:
-        search_url = f"https://en.wikipedia.org/w/index.php?search={species_name} ({species_type})&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1"
+        # 2. Scientific Name
+        sci_elem = bird_soup.select(".species-info em")
+        if sci_elem:
+            scientific_name = sci_elem[0].text
 
-    search_response = requests.get(search_url, headers=headers)
-    soup = BeautifulSoup(search_response.text, "html.parser")
+        # 3. Range Map
+        narrow_content = bird_soup.find("div", class_="narrow-content")
+        if narrow_content:
+            map_img = narrow_content.find("img")
+            if map_img:
+                interchange = map_img.get("data-interchange", "")
+                map_src = ""
+                if interchange:
+                    parts = [p.strip() for p in interchange.split(",") if "http" in p]
+                    if parts:
+                        map_src = parts[-1].replace("[", "").replace("]", "").split(" ")[0]
+                if not map_src:
+                    map_src = map_img.get("src", "")
+                if map_src:
+                    image_list.append(dict(title="Range Map", text=f"{species_name} Range", img=map_src))
 
-    list_tags = soup.find_all("li", attrs={"class": "mw-search-result mw-search-result-ns-0"})
-    if list_tags:
-        first_result = list_tags[0]
-        result_tag = first_result
-        for list_item in list_tags:
-            if "placeholder" not in str(list_item):
-                result_tag = list_item
-                break
+        # 4. Audio
+        audio_tag = bird_soup.find("audio", id="jp_audio_0")
+        if audio_tag and audio_tag.has_attr("src"):
+            audio_link = audio_tag["src"]
+        else:
+            audio_player = bird_soup.find("div", class_="player-audio")
+            if audio_player and audio_player.has_attr("name"):
+                audio_link = audio_player["name"]
 
-        title = result_tag.find("a").get("title")
-        first_title = first_result.find("a").get("title")
+        # 5. Overview Description
+        overview_heading = bird_soup.find("h2", class_="overview")
+        if overview_heading:
+            for sibling in overview_heading.find_next_siblings():
+                if sibling.name == "p" and sibling.text.strip():
+                    overview = sibling.text.strip()
+                    break
+except Exception:
+    pass  # Fall back gracefully if blocked or connection times out
 
-        url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{title.replace(' ', '_')}"
-        response = requests.get(url, headers=headers).json()
+# Fallback / Complement with Wikipedia & Xeno-Canto if scraping was blocked or incomplete
+wiki_search_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{species_name.replace(' ', '_')}"
+wiki_res = requests.get(wiki_search_url, headers={"User-Agent": "BloomWatch/1.0"})
+wiki_page_url = f"https://en.wikipedia.org/wiki/{species_name.replace(' ', '_')}"
 
-        st.title(species_name)
-        st.badge(label=species_type, color=color_map[species_type])
+if wiki_res.status_code == 200:
+    wiki_data = wiki_res.json()
+    if not overview and "extract" in wiki_data:
+        overview = wiki_data["extract"]
+    if not image_list and "thumbnail" in wiki_data:
+        image_list.append(dict(title="Specimen Photo", text=species_name, img=wiki_data["thumbnail"]["source"].replace("s.jpg", "800px.jpg")))
+    if "content_urls" in wiki_data and "desktop" in wiki_data["content_urls"]:
+        wiki_page_url = wiki_data["content_urls"]["desktop"]["page"]
 
-        if "thumbnail" in response:
-            st.image(response["thumbnail"]["source"])
+# Render Header & Badge
+title_str = f"{species_name} (*{scientific_name}*)" if scientific_name else species_name
+st.title(title_str)
+st.badge(label=species_type, color=color_map.get(species_type, "green"))
 
-        url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{first_title.replace(' ', '_')}"
-        response = requests.get(url, headers=headers).json()
+# Display Carousel
+if not image_list:
+    image_list.append(dict(title="Specimen Photo", text=species_name, img="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"))
 
-        if "extract" in response:
-            st.write(response["extract"])
+carousel(items=image_list, container_height=500)
 
-        st.subheader("Extra Info")
-        st.page_link(label="Wikipedia", page=f"https://en.wikipedia.org/wiki/{first_title}", icon=":material/info:")
-
-else:
-    # 1. Extract Hero Image safely from inline style or data-interchange
-    hero_section = find_hero_wrap[0]
-    style_attr = hero_section.get("style", "")
-    image_link = ""
-    if "url(" in style_attr:
-        image_link = style_attr.split('url("')[1].split('"')[0]
-
-    # 2. Extract Scientific Name
-    scientific_name_elem = bird_soup.select(".species-info em")
-    scientific_name = scientific_name_elem[0].text if scientific_name_elem else ""
-
-    # 3. Extract Range Map safely from .narrow-content
-    range_map = ""
-    narrow_content = bird_soup.find("div", class_="narrow-content")
-    if narrow_content:
-        map_img = narrow_content.find("img")
-        if map_img:
-            # Check data-interchange for high-res map image link, or fallback to src
-            interchange = map_img.get("data-interchange", "")
-            if interchange:
-                # Take the last URL in data-interchange for large screen high-res map
-                parts = [p.strip() for p in interchange.split(",") if "http" in p]
-                if parts:
-                    range_map = parts[-1].replace("[", "").replace("]", "").split(" ")[0]
-            if not range_map:
-                range_map = map_img.get("src", "")
-
-    # 4. Build Carousel List
-    image_list = []
-    if image_link:
-        image_list.append(dict(title="Species", text=species_name, img=image_link))
-    if range_map:
-        image_list.append(dict(title="Range Map", text=f"{species_name} Range", img=range_map))
-
-    # Pull additional hero gallery images if available from .hero-menu
-    hero_menu_items = bird_soup.select(".hero-menu li a")
-    for item in hero_menu_items:
-        img_tag = item.find("img")
-        label_tag = item.find("span", class_="txt-label")
-        if img_tag:
-            img_src = img_tag.get("src", "")
-            label_text = label_tag.text if label_tag else "Gallery Image"
-            if img_src and not any(d['img'] == img_src for d in image_list):
-                image_list.append(dict(title=label_text, text=species_name, img=img_src))
-
-    # Title and Badge
-    st.title(f"{species_name} (*{scientific_name}*)")
-    st.badge(label=species_type, color=color_map[species_type])
-
-    # Render Image Carousel
-    if image_list:
-        carousel(items=image_list, container_height=500)
-
-    # 5. Extract Bird Chirp Audio precisely from <audio id="jp_audio_0">
-    audio_tag = bird_soup.find("audio", id="jp_audio_0")
-    if audio_tag and audio_tag.has_attr("src"):
-        audio_link = audio_tag["src"]
-        st.subheader("Bird Audio Call")
+# Render Audio (Check All About Birds audio link first; if blocked, pull from Xeno-Canto API)
+if species_type == "Bird" or "Bird" in str(species_type) or species_type == "Animal":
+    st.subheader("Bird Audio Call / Chirp")
+    if audio_link:
         st.audio(audio_link)
     else:
-        audio_player = bird_soup.find("div", class_="player-audio")
-        if audio_player and audio_player.has_attr("name"):
-            st.subheader("Bird Audio Call")
-            st.audio(audio_player["name"])
+        try:
+            xc_res = requests.get(f"https://www.xeno-canto.org/api/2/recordings?query={species_name.replace(' ', '_')}")
+            xc_data = xc_res.json()
+            if xc_data.get("recordings") and len(xc_data["recordings"]) > 0:
+                rec = xc_data["recordings"][0]
+                st.audio("https:" + rec["file"])
+                st.caption(f"Audio recorded by {rec.get('rec', 'Unknown')} in {rec.get('loc', 'Unknown')} (Xeno-Canto)")
+            else:
+                st.info("No audio recordings found for this species.")
+        except Exception:
+            st.info("Audio lookup currently unavailable.")
 
-    # 6. Robust Description Extraction (skipping empty <p> tags)
-    overview = ""
-    overview_heading = bird_soup.find("h2", class_="overview")
-    if overview_heading:
-        for sibling in overview_heading.find_next_siblings():
-            if sibling.name == "p" and sibling.text.strip():
-                overview = sibling.text.strip()
-                break
+# Display Description
+if overview:
+    st.write(overview.replace('"', ""))
 
-    if not overview:
-        for p in bird_soup.select(".speciesInfoCard p"):
-            if len(p.text.strip()) > 20:
-                overview = p.text.strip()
-                break
-
-    if overview:
-        st.write(overview.replace('"', ""))
-
-    st.subheader("Extra Info")
-    st.page_link(label="All About Birds", page=allaboutbirds_url, icon=":material/info:")
+# Extra Info Links
+st.subheader("Extra Info")
+col_a, col_b = st.columns(2)
+with col_a:
+    st.page_link(label="All About Birds Guide", page=allaboutbirds_url, icon=":material/info:")
+with col_b:
+    st.page_link(label="Wikipedia Entry", page=wiki_page_url, icon=":material/menu_book:")
