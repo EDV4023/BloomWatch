@@ -62,13 +62,13 @@ try:
     if l:
         df_data = []
         for i in range(1, min(11, len(l) + 1)):
-            # Assigning text-based rank formatting for top 3 (No emojis)
+            # Assigning gold, silver, and bronze emojis for ranks 1, 2, and 3
             if i == 1:
-                rank_display = "1 (Gold)"
+                rank_display = "🥇 1"
             elif i == 2:
-                rank_display = "2 (Silver)"
+                rank_display = "🥈 2"
             elif i == 3:
-                rank_display = "3 (Bronze)"
+                rank_display = "🥉 3"
             else:
                 rank_display = str(i)
 
@@ -80,7 +80,7 @@ try:
         
         df = pd.DataFrame(df_data)
         
-        # Fixed container logic using Streamlit's native bordered container
+        # Streamlit native bordered container wrapper
         with st.container(border=True):
             st.dataframe(df, use_container_width=True, hide_index=True)
     else:
